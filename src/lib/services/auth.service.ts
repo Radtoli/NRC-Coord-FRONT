@@ -11,7 +11,7 @@ interface LoginResponse {
 export const authService = {
   // Login do usuário
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+    const response = await api.post<ApiResponse<LoginResponse>>('/users/auth/login', credentials);
 
     // Salvar token no localStorage se o login for bem-sucedido
     if (response.success && response.data) {
@@ -24,7 +24,7 @@ export const authService = {
 
   // Trocar senha
   async changePassword(data: ChangePasswordRequest): Promise<ApiResponse<{ message: string }>> {
-    return api.patch<ApiResponse<{ message: string }>>('/auth/change-password', data);
+    return api.patch<ApiResponse<{ message: string }>>('/users/auth/change-password', data);
   },
 
   // Logout
@@ -64,21 +64,21 @@ export const authService = {
 export const userService = {
   // Criar usuário (apenas managers)
   async createUser(userData: CreateUserRequest): Promise<ApiResponse<User>> {
-    return api.post<ApiResponse<User>>('/users', userData);
+    return api.post<ApiResponse<User>>('/users/users', userData);
   },
 
   // Atualizar usuário (apenas managers)
   async updateUser(id: string, userData: UpdateUserRequest): Promise<ApiResponse<User>> {
-    return api.put<ApiResponse<User>>(`/users/${id}`, userData);
+    return api.put<ApiResponse<User>>(`/users/users/${id}`, userData);
   },
 
   // Listar todos os usuários (seria necessário adicionar essa rota no backend)
   async listUsers(): Promise<ApiResponse<User[]>> {
-    return api.get<ApiResponse<User[]>>('/users');
+    return api.get<ApiResponse<User[]>>('/users/users');
   },
 
   // Buscar usuário por ID (seria necessário adicionar essa rota no backend)
   async getUserById(id: string): Promise<ApiResponse<User>> {
-    return api.get<ApiResponse<User>>(`/users/${id}`);
+    return api.get<ApiResponse<User>>(`/users/users/${id}`);
   }
 };
