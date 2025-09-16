@@ -29,7 +29,9 @@ export const login = async (email: string, password: string): Promise<{ success:
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: (user.roles && user.roles.length > 0)
+          ? user.roles[0]
+          : (user.role || 'user')
       };
 
       authState = {
@@ -68,7 +70,9 @@ export const getCurrentUser = (): AuthUser | null => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: (user.roles && user.roles.length > 0)
+          ? user.roles[0]
+          : (user.role || 'user')
       };
 
       authState = {
@@ -77,6 +81,12 @@ export const getCurrentUser = (): AuthUser | null => {
       };
 
       return authUser;
+    } else {
+      // Se getCurrentUser retornou null (por token expirado), limpar estado
+      authState = {
+        isAuthenticated: false,
+        user: null
+      };
     }
   }
 

@@ -74,16 +74,22 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
 
-      // Se é erro 401, limpar autenticação e redirecionar para login
-      if (response.status === 401) {
+      const data = await response.json();
+      console.log('[DEBUG API] Response status:', response.status);
+      console.log('[DEBUG API] Response data:', data);
+
+      // Se é erro 401 e NÃO é rota de login, limpar autenticação
+      if (response.status === 401 && !endpoint.includes('/auth/login')) {
         if (typeof window !== 'undefined') {
+          console.log('[DEBUG API] 401 error on non-login route, clearing auth');
           localStorage.removeItem('auth');
-          window.location.href = '/login';
+          // Apenas redirecionar se não estivermos já na página de login
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
         }
         throw new Error('Sessão expirada. Faça login novamente.');
       }
-
-      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || `HTTP ${response.status}`);
@@ -91,7 +97,7 @@ class ApiClient {
 
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('[DEBUG API] API Error:', error);
       throw error;
     }
   }
@@ -140,9 +146,11 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'user' | 'manager';
-  createdAt: string;
-  updatedAt: string;
+  role?: 'user' | 'manager'; // Para compatibilidade
+  roles?: ('user' | 'manager')[]; // Como o backend realmente retorna
+  permissions?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Video {

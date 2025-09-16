@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authService } from '../services';
 import { AuthUser } from '../auth';
-import { isTokenExpired } from '../utils/jwt-utils';
 
 interface AuthState {
   user: AuthUser | null;
@@ -9,19 +8,7 @@ interface AuthState {
   isLoading: boolean;
 }
 
-// Debug function
-const debugAuth = (context: string) => {
-  const authData = localStorage.getItem('auth');
-  console.log(`[DEBUG ${context}] Auth data:`, authData ? JSON.parse(authData) : null);
-  if (authData) {
-    const user = JSON.parse(authData);
-    if (user.token) {
-      console.log(`[DEBUG ${context}] Token expired:`, isTokenExpired(user.token));
-    }
-  }
-};
-
-export const useAuth = () => {
+export const useAuthSimple = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
@@ -29,13 +16,19 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    const initAuth = () => {
-      debugAuth('INIT_AUTH');
+    const initAuth = async () => {
       try {
-        // Primeiro, vamos apenas verificar se há dados no localStorage sem validar token
+        console.log('[DEBUG SIMPLE] Initializing auth...');
+
+        // Aguardar um pequeno delay para evitar race conditions
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verificar se há dados no localStorage
         const authData = localStorage.getItem('auth');
+        console.log('[DEBUG SIMPLE] Auth data:', authData);
+
         if (!authData) {
-          console.log('[DEBUG INIT_AUTH] No auth data found');
+          console.log('[DEBUG SIMPLE] No auth data found');
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -45,8 +38,10 @@ export const useAuth = () => {
         }
 
         const userData = JSON.parse(authData);
+        console.log('[DEBUG SIMPLE] Parsed user data:', userData);
+
         if (!userData.token) {
-          console.log('[DEBUG INIT_AUTH] No token found');
+          console.log('[DEBUG SIMPLE] No token found');
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -55,9 +50,9 @@ export const useAuth = () => {
           return;
         }
 
-        // Verificar se o token está expirado
-        if (isTokenExpired(userData.token)) {
-          console.log('[DEBUG INIT_AUTH] Token is expired, clearing data');
+        // Verificar se os dados essenciais do usuário estão presentes
+        if (!userData._id || !userData.name || !userData.email) {
+          console.log('[DEBUG SIMPLE] Incomplete user data found, clearing localStorage');
           localStorage.removeItem('auth');
           setAuthState({
             user: null,
@@ -67,23 +62,29 @@ export const useAuth = () => {
           return;
         }
 
-        // Token válido, definir usuário autenticado
+        // Por agora, não vamos verificar expiração - apenas se o token existe
         const user: AuthUser = {
-          _id: userData._id,
+          _id: userData._id || userData.userId, // Fallback para userId se _id não existir
           name: userData.name,
           email: userData.email,
           role: userData.role
         };
 
-        console.log('[DEBUG INIT_AUTH] Setting authenticated user:', user);
+        console.log('[DEBUG SIMPLE] Setting authenticated user:', user);
+        console.log('[DEBUG SIMPLE] User has all required fields?', {
+          _id: !!user._id,
+          name: !!user.name,
+          email: !!user.email,
+          role: !!user.role
+        });
+
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
       } catch (error) {
-        console.error('Error initializing auth:', error);
-        localStorage.removeItem('auth');
+        console.error('[DEBUG SIMPLE] Error initializing auth:', error);
         setAuthState({
           user: null,
           isAuthenticated: false,
@@ -97,35 +98,14 @@ export const useAuth = () => {
     // Listener para mudanças no localStorage
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'auth') {
+        console.log('[DEBUG SIMPLE] Storage changed, reinitializing...');
         initAuth();
       }
     };
 
-    // Verificar token expirado a cada minuto
-    const tokenCheckInterval = setInterval(() => {
-      const authData = localStorage.getItem('auth');
-      if (authData) {
-        try {
-          const user = JSON.parse(authData);
-          if (user.token && isTokenExpired(user.token)) {
-            console.log('Token expired, logging out user');
-            authService.logout();
-            setAuthState({
-              user: null,
-              isAuthenticated: false,
-              isLoading: false,
-            });
-          }
-        } catch (error) {
-          console.error('Error checking token expiration:', error);
-        }
-      }
-    }, 60000); // Verificar a cada minuto
-
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(tokenCheckInterval);
     };
   }, []);
 
@@ -133,36 +113,38 @@ export const useAuth = () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
 
-      console.log('[DEBUG LOGIN] Starting login process');
+      console.log('[DEBUG SIMPLE] Starting login process');
       const response = await authService.login({ email, password });
-      console.log('[DEBUG LOGIN] Login response:', response);
+      console.log('[DEBUG SIMPLE] Login response:', response);
+      console.log('[DEBUG SIMPLE] Response data:', response.data);
+      console.log('[DEBUG SIMPLE] User object:', response.data?.user);
 
       if (response.success && response.data) {
         const user: AuthUser = {
           _id: response.data.user._id,
           name: response.data.user.name,
           email: response.data.user.email,
-          role: (response.data.user.roles && response.data.user.roles.length > 0)
-            ? response.data.user.roles[0]
-            : (response.data.user.role || 'user')
+          role: response.data.user.roles && response.data.user.roles.length > 0 
+            ? response.data.user.roles[0] 
+            : 'user'
         };
 
-        console.log('[DEBUG LOGIN] Setting authenticated user:', user);
+        console.log('[DEBUG SIMPLE] Setting authenticated user after login:', user);
+        console.log('[DEBUG SIMPLE] Raw user data from response:', response.data.user);
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
 
-        debugAuth('AFTER_LOGIN');
         return { success: true, user };
       } else {
-        console.log('[DEBUG LOGIN] Login failed:', response.message);
+        console.log('[DEBUG SIMPLE] Login failed:', response.message);
         setAuthState(prev => ({ ...prev, isLoading: false }));
         return { success: false, error: response.message || 'Erro no login' };
       }
     } catch (error) {
-      console.error('[DEBUG LOGIN] Login error:', error);
+      console.error('[DEBUG SIMPLE] Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return {
         success: false,
@@ -172,6 +154,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
+    console.log('[DEBUG SIMPLE] Logging out...');
     authService.logout();
     setAuthState({
       user: null,

@@ -6,42 +6,50 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoCard } from "@/components/VideoCard";
-import { getTrilhas, Trilha } from "@/config/trilhas";
-import { getCurrentUser, logout, hasAdminRole, AuthUser } from "@/lib/auth";
-import { LogOut, Settings, User, Play, BookOpen, AlertCircle } from "lucide-react";
+import { Trilha, getTrilhas } from "@/config/trilhas";
+import { useAuthContext } from "@/lib/context";
+import { LogOut, Settings, User, Play, BookOpen, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const { user: currentUser, isAuthenticated, logout, isManager, isLoading: authLoading } = useAuthContext();
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTrilhas, setIsLoadingTrilhas] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
+    // Esperar o loading de auth terminar antes de verificar autenticação
+    if (authLoading) {
+      console.log('[DEBUG DASHBOARD] Auth still loading...');
+      return;
+    }
+
+    if (!isAuthenticated || !currentUser) {
+      console.log('[DEBUG DASHBOARD] Not authenticated, redirecting to login');
       router.push("/login");
       return;
     }
-    setCurrentUser(user);
 
-    // Buscar trilhas da API
+    console.log('[DEBUG DASHBOARD] User authenticated:', currentUser);
+
     const loadTrilhas = async () => {
       try {
-        setIsLoading(true);
+        setIsLoadingTrilhas(true);
         setError(null);
+        console.log('[DEBUG DASHBOARD] Loading trilhas...');
         const trilhasData = await getTrilhas();
+        console.log('[DEBUG DASHBOARD] Trilhas loaded:', trilhasData);
         setTrilhas(trilhasData);
       } catch (error) {
         console.error('Erro ao carregar trilhas:', error);
         setError('Erro ao carregar dados. Tente novamente.');
       } finally {
-        setIsLoading(false);
+        setIsLoadingTrilhas(false);
       }
     };
 
     loadTrilhas();
-  }, [router]);
+  }, [router, isAuthenticated, currentUser, authLoading]);
 
   const handleLogout = () => {
     logout();
@@ -52,12 +60,28 @@ export default function DashboardPage() {
     router.push("/admin/users");
   };
 
-  if (isLoading) {
+  const handleRefreshTrilhas = async () => {
+    try {
+      setIsLoadingTrilhas(true);
+      setError(null);
+      const trilhasData = await getTrilhas();
+      setTrilhas(trilhasData);
+    } catch (error) {
+      console.error('Erro ao carregar trilhas:', error);
+      setError('Erro ao carregar dados. Tente novamente.');
+    } finally {
+      setIsLoadingTrilhas(false);
+    }
+  };
+
+  if (authLoading || isLoadingTrilhas) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando dados...</p>
+          <p className="mt-4 text-muted-foreground">
+            {authLoading ? 'Carregando autenticação...' : 'Carregando trilhas...'}
+          </p>
         </div>
       </div>
     );
@@ -70,7 +94,8 @@ export default function DashboardPage() {
           <AlertCircle className="w-16 h-16 text-destructive mx-auto" />
           <h2 className="text-xl font-semibold">Erro ao carregar dados</h2>
           <p className="text-muted-foreground">{error}</p>
-          <Button onClick={() => window.location.reload()}>
+          <Button onClick={handleRefreshTrilhas}>
+            <RefreshCw className="w-4 h-4 mr-2" />
             Tentar novamente
           </Button>
         </div>
@@ -79,7 +104,7 @@ export default function DashboardPage() {
   }
 
   const totalVideos = trilhas.reduce((acc, trilha) => acc + trilha.videos.length, 0);
-  const isAdmin = hasAdminRole();
+  const isAdmin = isManager();
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,6 +128,16 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshTrilhas}
+              disabled={isLoadingTrilhas}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingTrilhas ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+
             <div className="hidden md:flex items-center gap-2">
               <User className="w-4 h-4" />
               <span className="text-sm font-medium">{currentUser?.name}</span>
