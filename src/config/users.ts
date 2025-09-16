@@ -1,14 +1,95 @@
+import { userService, User as ApiUser } from '@/lib/services';
+
+// Interface compatível com o código existente
 export interface User {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string; // Não vem da API por segurança
   role: 'user' | 'admin';
   createdAt: string;
   lastLogin?: string;
 }
 
-export const users: User[] = [
+// Cache simples para usuários
+let usersCache: User[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+// Função para limpar o cache
+export const clearUsersCache = () => {
+  usersCache = null;
+  cacheTimestamp = 0;
+};
+
+// Converter usuário da API para o formato local
+const convertApiUserToUser = (apiUser: ApiUser): User => {
+  return {
+    id: apiUser._id,
+    name: apiUser.name,
+    email: apiUser.email,
+    role: apiUser.role === 'manager' ? 'admin' : 'user',
+    createdAt: new Date(apiUser.createdAt).toISOString().split('T')[0],
+    lastLogin: new Date(apiUser.updatedAt).toISOString().split('T')[0]
+  };
+};
+
+// Função para buscar usuários da API
+export const getUsers = async (): Promise<User[]> => {
+  // Verificar se o cache ainda é válido
+  const now = Date.now();
+  if (usersCache && (now - cacheTimestamp) < CACHE_DURATION) {
+    return usersCache;
+  }
+
+  try {
+    const response = await userService.listUsers();
+
+    if (!response.success || !response.data) {
+      console.error('Erro ao buscar usuários:', response.message);
+      return [];
+    }
+
+    const users = response.data.map(convertApiUserToUser);
+
+    // Atualizar cache
+    usersCache = users;
+    cacheTimestamp = now;
+
+    return users;
+  } catch (error) {
+    console.error('Erro ao buscar usuários da API:', error);
+    return [];
+  }
+};
+
+export const getUserById = async (id: string): Promise<User | undefined> => {
+  try {
+    const response = await userService.getUserById(id);
+
+    if (!response.success || !response.data) {
+      return undefined;
+    }
+
+    return convertApiUserToUser(response.data);
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    return undefined;
+  }
+};
+
+export const getUserByEmail = async (email: string): Promise<User | undefined> => {
+  try {
+    const users = await getUsers();
+    return users.find(user => user.email === email);
+  } catch (error) {
+    console.error('Erro ao buscar usuário por email:', error);
+    return undefined;
+  }
+};
+
+// Dados mockados como fallback para desenvolvimento
+export const usersMock: User[] = [
   {
     id: "1",
     name: "João Silva",
@@ -64,11 +145,3 @@ export const users: User[] = [
     lastLogin: "2024-09-11"
   }
 ];
-
-export const getUserById = (id: string): User | undefined => {
-  return users.find(user => user.id === id);
-};
-
-export const getUserByEmail = (email: string): User | undefined => {
-  return users.find(user => user.email === email);
-};

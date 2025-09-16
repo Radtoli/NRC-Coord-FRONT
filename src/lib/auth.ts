@@ -1,10 +1,10 @@
-import { getUserByEmail } from '@/config/users';
+import { authService } from './services';
 
 export interface AuthUser {
-  id: string;
+  _id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'manager';
 }
 
 interface AuthState {
@@ -19,37 +19,35 @@ let authState: AuthState = {
 };
 
 export const login = async (email: string, password: string): Promise<{ success: boolean; user?: AuthUser; error?: string }> => {
-  // Simula delay de API
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  try {
+    const response = await authService.login({ email, password });
 
-  const user = getUserByEmail(email);
+    if (response.success && response.data) {
+      const { user } = response.data;
 
-  if (!user) {
-    return { success: false, error: 'Usuário não encontrado' };
+      const authUser: AuthUser = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+
+      authState = {
+        isAuthenticated: true,
+        user: authUser
+      };
+
+      return { success: true, user: authUser };
+    } else {
+      return { success: false, error: response.message || 'Erro no login' };
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro no servidor'
+    };
   }
-
-  if (user.password !== password) {
-    return { success: false, error: 'Senha incorreta' };
-  }
-
-  const authUser: AuthUser = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  };
-
-  authState = {
-    isAuthenticated: true,
-    user: authUser
-  };
-
-  // Em uma aplicação real, salvaria o token no localStorage/cookies
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('auth', JSON.stringify(authUser));
-  }
-
-  return { success: true, user: authUser };
 };
 
 export const logout = (): void => {
@@ -58,26 +56,27 @@ export const logout = (): void => {
     user: null
   };
 
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth');
-  }
+  authService.logout();
 };
 
 export const getCurrentUser = (): AuthUser | null => {
   // Verifica se há dados salvos no localStorage
   if (typeof window !== 'undefined' && !authState.user) {
-    const saved = localStorage.getItem('auth');
-    if (saved) {
-      try {
-        const user = JSON.parse(saved);
-        authState = {
-          isAuthenticated: true,
-          user
-        };
-        return user;
-      } catch {
-        localStorage.removeItem('auth');
-      }
+    const user = authService.getCurrentUser();
+    if (user) {
+      const authUser: AuthUser = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+
+      authState = {
+        isAuthenticated: true,
+        user: authUser
+      };
+
+      return authUser;
     }
   }
 
@@ -90,7 +89,7 @@ export const isAuthenticated = (): boolean => {
 
 export const hasAdminRole = (): boolean => {
   const user = getCurrentUser();
-  return user?.role === 'admin';
+  return user?.role === 'manager';
 };
 
 export const requireAuth = (): AuthUser => {
@@ -103,7 +102,7 @@ export const requireAuth = (): AuthUser => {
 
 export const requireAdmin = (): AuthUser => {
   const user = requireAuth();
-  if (user.role !== 'admin') {
+  if (user.role !== 'manager') {
     throw new Error('Acesso negado. Apenas administradores podem acessar esta funcionalidade.');
   }
   return user;

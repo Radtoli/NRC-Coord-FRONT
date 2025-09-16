@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SidebarVideos } from "@/components/SidebarVideos";
 import { DownloadDocs } from "@/components/DownloadDocs";
-import { getVideoById, getTrilhaByVideoId } from "@/config/trilhas";
+import { getVideoById, getTrilhaByVideoId, Video, Trilha } from "@/config/trilhas";
 import { getCurrentUser, logout, hasAdminRole, AuthUser } from "@/lib/auth";
-import { ArrowLeft, LogOut, Settings, User, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, LogOut, Settings, User, Clock, Calendar, AlertCircle } from "lucide-react";
 
 export default function VideoPage() {
   const router = useRouter();
@@ -17,10 +17,10 @@ export default function VideoPage() {
   const videoId = params?.id as string;
 
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [video, setVideo] = useState<Video | null>(null);
+  const [trilha, setTrilha] = useState<Trilha | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const video = getVideoById(videoId);
-  const trilha = getTrilhaByVideoId(videoId);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -29,14 +29,49 @@ export default function VideoPage() {
       return;
     }
     setCurrentUser(user);
-    setIsLoading(false);
-  }, [router]);
+
+    // Buscar dados do vídeo e trilha
+    const loadVideoData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [videoData, trilhaData] = await Promise.all([
+          getVideoById(videoId),
+          getTrilhaByVideoId(videoId)
+        ]);
+
+        if (!videoData) {
+          setError('Vídeo não encontrado');
+          return;
+        }
+
+        if (!trilhaData) {
+          setError('Trilha não encontrada');
+          return;
+        }
+
+        setVideo(videoData);
+        setTrilha(trilhaData);
+      } catch (error) {
+        console.error('Erro ao carregar dados do vídeo:', error);
+        setError('Erro ao carregar dados. Tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadVideoData();
+  }, [router, videoId]);
 
   useEffect(() => {
-    if (!isLoading && !video) {
-      router.push("/dashboard");
+    if (!isLoading && error) {
+      const timer = setTimeout(() => {
+        router.push("/dashboard");
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [isLoading, video, router]);
+  }, [isLoading, error, router]);
 
   const handleLogout = () => {
     logout();
@@ -56,14 +91,26 @@ export default function VideoPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando...</p>
+          <p className="mt-4 text-muted-foreground">Carregando vídeo...</p>
         </div>
       </div>
     );
   }
 
-  if (!video || !trilha) {
-    return null;
+  if (error || !video || !trilha) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto" />
+          <h2 className="text-xl font-semibold">Erro ao carregar vídeo</h2>
+          <p className="text-muted-foreground">{error || 'Vídeo não encontrado'}</p>
+          <p className="text-sm text-muted-foreground">Redirecionando para o dashboard...</p>
+          <Button onClick={() => router.push("/dashboard")}>
+            Ir para Dashboard
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const isAdmin = hasAdminRole();

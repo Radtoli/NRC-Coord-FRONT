@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserTable } from "@/components/UserTable";
-import { users as initialUsers, User } from "@/config/users";
+import { getUsers, User } from "@/config/users";
 import { getCurrentUser, logout, requireAdmin, AuthUser } from "@/lib/auth";
-import { ArrowLeft, LogOut, User as UserIcon, Shield, AlertCircle } from "lucide-react";
+import { userService } from "@/lib/services";
+import { ArrowLeft, LogOut, User as UserIcon, Shield, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function AdminUsersPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -27,7 +28,9 @@ export default function AdminUsersPage() {
       // Verifica se é admin
       requireAdmin();
       setCurrentUser(user);
-      setIsLoading(false);
+
+      // Carregar usuários da API
+      loadUsers();
     } catch {
       setError("Acesso negado. Apenas administradores podem acessar esta página.");
       setTimeout(() => {
@@ -35,6 +38,20 @@ export default function AdminUsersPage() {
       }, 3000);
     }
   }, [router]);
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const usersData = await getUsers();
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+      setError('Erro ao carregar usuários. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -45,23 +62,62 @@ export default function AdminUsersPage() {
     router.push("/dashboard");
   };
 
-  const handleCreateUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
-    const newUser: User = {
-      ...userData,
-      id: (users.length + 1).toString(),
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    setUsers([...users, newUser]);
+  const handleCreateUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
+    try {
+      const createData = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password || '123456', // Senha padrão
+        role: userData.role === 'admin' ? 'manager' as const : 'user' as const
+      };
+
+      const response = await userService.createUser(createData);
+
+      if (response.success) {
+        // Recarregar lista de usuários
+        await loadUsers();
+      } else {
+        setError(response.message || 'Erro ao criar usuário');
+      }
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      setError('Erro ao criar usuário. Tente novamente.');
+    }
   };
 
-  const handleUpdateUser = (id: string, userData: Partial<User>) => {
-    setUsers(users.map(user =>
-      user.id === id ? { ...user, ...userData } : user
-    ));
+  const handleUpdateUser = async (id: string, userData: Partial<User>) => {
+    try {
+      const updateData: { name?: string; email?: string; role?: 'user' | 'manager' } = {};
+
+      if (userData.name) updateData.name = userData.name;
+      if (userData.email) updateData.email = userData.email;
+      if (userData.role) {
+        updateData.role = userData.role === 'admin' ? 'manager' : 'user';
+      }
+
+      const response = await userService.updateUser(id, updateData);
+
+      if (response.success) {
+        // Recarregar lista de usuários
+        await loadUsers();
+      } else {
+        setError(response.message || 'Erro ao atualizar usuário');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      setError('Erro ao atualizar usuário. Tente novamente.');
+    }
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
+    // Nota: O backend não tem endpoint de delete user ainda
+    // Por enquanto, apenas remove da lista local
     setUsers(users.filter(user => user.id !== id));
+    setError('Funcionalidade de exclusão ainda não implementada no backend.');
+  };
+
+  const handleRefresh = () => {
+    loadUsers();
   };
 
   if (isLoading) {
@@ -69,22 +125,27 @@ export default function AdminUsersPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Verificando permissões...</p>
+          <p className="mt-4 text-muted-foreground">Carregando usuários...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && users.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md">
+        <div className="text-center max-w-md space-y-4">
           <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Acesso Negado</h2>
+          <h2 className="text-xl font-bold mb-2">
+            {error.includes('Acesso negado') ? 'Acesso Negado' : 'Erro ao Carregar'}
+          </h2>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <p className="text-sm text-muted-foreground">
-            Redirecionando para o dashboard...
-          </p>
+          {!error.includes('Acesso negado') && (
+            <Button onClick={loadUsers}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Tentar Novamente
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -114,6 +175,16 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+
             <div className="hidden md:flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
               <span className="text-sm font-medium">{currentUser?.name}</span>
@@ -134,6 +205,24 @@ export default function AdminUsersPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive" />
+                <p className="text-sm text-destructive">{error}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setError("")}
+                  className="ml-auto"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Welcome Section */}
           <div className="space-y-4">
             <h2 className="text-3xl font-bold">Painel de Administração</h2>

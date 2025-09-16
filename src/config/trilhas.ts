@@ -1,28 +1,106 @@
-export interface Video {
-  id: string;
-  title: string;
-  description: string;
-  youtubeId: string;
-  duration: string;
-  documents: Document[];
-}
+import { trilhaService, videoService, documentService } from '@/lib/services';
+import {
+  Video,
+  Document,
+  Trilha,
+  convertApiVideoToVideo,
+  convertApiTrilhaToTrilha
+} from '@/lib/adapters';
 
-export interface Document {
-  id: string;
-  title: string;
-  type: 'pdf' | 'doc' | 'ppt' | 'xlsx';
-  url: string;
-  size: string;
-}
+// Cache simples para evitar múltiplas requisições
+let trilhasCache: Trilha[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
-export interface Trilha {
-  id: string;
-  title: string;
-  description: string;
-  videos: Video[];
-}
+// Função para limpar o cache
+export const clearTrilhasCache = () => {
+  trilhasCache = null;
+  cacheTimestamp = 0;
+};
 
-export const trilhas: Trilha[] = [
+// Função para buscar trilhas da API
+export const getTrilhas = async (): Promise<Trilha[]> => {
+  // Verificar se o cache ainda é válido
+  const now = Date.now();
+  if (trilhasCache && (now - cacheTimestamp) < CACHE_DURATION) {
+    return trilhasCache;
+  }
+
+  try {
+    const trilhasResponse = await trilhaService.listTrilhas();
+
+    if (!trilhasResponse.success || !trilhasResponse.data) {
+      console.error('Erro ao buscar trilhas:', trilhasResponse.message);
+      return [];
+    }
+
+    const videosResponse = await videoService.listVideos();
+    const documentsResponse = await documentService.listDocuments();
+
+    const videos = videosResponse.success && videosResponse.data ? videosResponse.data : [];
+    const documents = documentsResponse.success && documentsResponse.data ? documentsResponse.data : [];
+
+    // Converter e associar vídeos às trilhas
+    const trilhas = trilhasResponse.data.map(apiTrilha => {
+      const trilhaVideos = videos
+        .filter(video => video.trilha === apiTrilha._id)
+        .map(apiVideo => {
+          const videoDocuments = documents.filter(doc =>
+            apiVideo.documents.includes(doc._id)
+          );
+          return convertApiVideoToVideo(apiVideo, videoDocuments);
+        });
+
+      return convertApiTrilhaToTrilha(apiTrilha, trilhaVideos);
+    });
+
+    // Atualizar cache
+    trilhasCache = trilhas;
+    cacheTimestamp = now;
+
+    return trilhas;
+  } catch (error) {
+    console.error('Erro ao buscar trilhas da API:', error);
+    return [];
+  }
+};
+
+export const getVideoById = async (id: string): Promise<Video | undefined> => {
+  try {
+    const response = await videoService.getVideoById(id);
+
+    if (!response.success || !response.data) {
+      return undefined;
+    }
+
+    const documentsResponse = await documentService.listDocuments();
+    const documents = documentsResponse.success && documentsResponse.data ? documentsResponse.data : [];
+
+    const videoDocuments = documents.filter(doc =>
+      response.data!.documents.includes(doc._id)
+    );
+
+    return convertApiVideoToVideo(response.data, videoDocuments);
+  } catch (error) {
+    console.error('Erro ao buscar vídeo:', error);
+    return undefined;
+  }
+};
+
+export const getTrilhaByVideoId = async (videoId: string): Promise<Trilha | undefined> => {
+  try {
+    const trilhas = await getTrilhas();
+    return trilhas.find(trilha =>
+      trilha.videos.some(video => video.id === videoId)
+    );
+  } catch (error) {
+    console.error('Erro ao buscar trilha por vídeo:', error);
+    return undefined;
+  }
+};
+
+// Manter dados mockados como fallback para desenvolvimento
+export const trilhasMock: Trilha[] = [
   {
     id: "1",
     title: "Bem vindo ao sistema de Ensino",
@@ -186,16 +264,5 @@ export const trilhas: Trilha[] = [
   }
 ];
 
-export const getVideoById = (id: string): Video | undefined => {
-  for (const trilha of trilhas) {
-    const video = trilha.videos.find(v => v.id === id);
-    if (video) return video;
-  }
-  return undefined;
-};
-
-export const getTrilhaByVideoId = (videoId: string): Trilha | undefined => {
-  return trilhas.find(trilha =>
-    trilha.videos.some(video => video.id === videoId)
-  );
-};
+// Exportar interfaces para compatibilidade
+export type { Video, Document, Trilha };

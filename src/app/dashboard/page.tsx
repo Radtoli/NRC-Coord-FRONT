@@ -6,14 +6,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoCard } from "@/components/VideoCard";
-import { trilhas } from "@/config/trilhas";
+import { getTrilhas, Trilha } from "@/config/trilhas";
 import { getCurrentUser, logout, hasAdminRole, AuthUser } from "@/lib/auth";
-import { LogOut, Settings, User, Play, BookOpen } from "lucide-react";
+import { LogOut, Settings, User, Play, BookOpen, AlertCircle } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -22,7 +24,23 @@ export default function DashboardPage() {
       return;
     }
     setCurrentUser(user);
-    setIsLoading(false);
+
+    // Buscar trilhas da API
+    const loadTrilhas = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const trilhasData = await getTrilhas();
+        setTrilhas(trilhasData);
+      } catch (error) {
+        console.error('Erro ao carregar trilhas:', error);
+        setError('Erro ao carregar dados. Tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTrilhas();
   }, [router]);
 
   const handleLogout = () => {
@@ -39,7 +57,22 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando...</p>
+          <p className="mt-4 text-muted-foreground">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto" />
+          <h2 className="text-xl font-semibold">Erro ao carregar dados</h2>
+          <p className="text-muted-foreground">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Tentar novamente
+          </Button>
         </div>
       </div>
     );
@@ -121,36 +154,55 @@ export default function DashboardPage() {
           </div>
 
           {/* Trilhas Section */}
-          <div className="space-y-12">
-            {trilhas.map((trilha) => (
-              <div key={trilha.id} className="space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{trilha.title}</h3>
-                    <Badge variant="secondary">
-                      {trilha.videos.length} vídeo{trilha.videos.length !== 1 ? 's' : ''}
-                    </Badge>
+          {trilhas.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Nenhuma trilha encontrada</h3>
+              <p className="text-muted-foreground">
+                Não há trilhas de treinamento disponíveis no momento.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {trilhas.map((trilha) => (
+                <div key={trilha.id} className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-2xl font-bold">{trilha.title}</h3>
+                      <Badge variant="secondary">
+                        {trilha.videos.length} vídeo{trilha.videos.length !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground">
+                      {trilha.description}
+                    </p>
                   </div>
-                  <p className="text-muted-foreground">
-                    {trilha.description}
-                  </p>
-                </div>
 
-                {/* Videos Horizontais */}
-                <ScrollArea className="w-full whitespace-nowrap">
-                  <div className="flex gap-4 pb-4">
-                    {trilha.videos.map((video) => (
-                      <VideoCard
-                        key={video.id}
-                        video={video}
-                        className="w-80 flex-shrink-0"
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            ))}
-          </div>
+                  {/* Videos Horizontais */}
+                  {trilha.videos.length === 0 ? (
+                    <div className="text-center py-8 bg-muted/50 rounded-lg">
+                      <Play className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground">
+                        Nenhum vídeo disponível nesta trilha.
+                      </p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="w-full whitespace-nowrap">
+                      <div className="flex gap-4 pb-4">
+                        {trilha.videos.map((video) => (
+                          <VideoCard
+                            key={video.id}
+                            video={video}
+                            className="w-80 flex-shrink-0"
+                          />
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t">

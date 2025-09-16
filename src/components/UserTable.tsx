@@ -67,7 +67,7 @@ export function UserTable({ users, onCreateUser, onUpdateUser, onDeleteUser }: U
     setFormData({
       name: user.name,
       email: user.email,
-      password: user.password,
+      password: '', // Não mostrar senha atual por segurança
       role: user.role
     });
     setIsEditDialogOpen(true);
