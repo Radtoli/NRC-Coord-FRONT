@@ -1,6 +1,9 @@
 // Configuração base da API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+console.log('[DEBUG API] Environment API URL:', process.env.NEXT_PUBLIC_API_URL);
+console.log('[DEBUG API] Final API_BASE_URL:', API_BASE_URL);
+
 // Interface para responses da API
 interface ApiResponse<T = unknown> {
   success: boolean;
@@ -21,6 +24,7 @@ class ApiClient {
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+    console.log('[DEBUG API] ApiClient initialized with baseURL:', baseURL);
   }
 
   private getAuthToken(): string | null {
@@ -40,8 +44,33 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
+    // Normalizar a baseURL - remover trailing slash se existir
+    const normalizedBaseURL = this.baseURL.endsWith('/')
+      ? this.baseURL.slice(0, -1)
+      : this.baseURL;
+
+    // Normalizar o endpoint - garantir que comece com /
+    const normalizedEndpoint = endpoint.startsWith('/')
+      ? endpoint
+      : `/${endpoint}`;
+
+    const url = `${normalizedBaseURL}${normalizedEndpoint}`;
     const token = this.getAuthToken();
+
+    // Log para debug
+    console.log('[DEBUG API] Original Base URL:', this.baseURL);
+    console.log('[DEBUG API] Normalized Base URL:', normalizedBaseURL);
+    console.log('[DEBUG API] Original Endpoint:', endpoint);
+    console.log('[DEBUG API] Normalized Endpoint:', normalizedEndpoint);
+    console.log('[DEBUG API] Final URL:', url);
+
+    // Validação adicional da URL
+    try {
+      new URL(url);
+    } catch (urlError) {
+      console.error('[DEBUG API] Invalid URL constructed:', url, urlError);
+      throw new Error(`URL inválida construída: ${url}`);
+    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
