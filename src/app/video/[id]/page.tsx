@@ -7,28 +7,29 @@ import { Badge } from "@/components/ui/badge";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SidebarVideos } from "@/components/SidebarVideos";
 import { DownloadDocs } from "@/components/DownloadDocs";
+import { AppHeader } from "@/components/AppHeader";
 import { getVideoById, getTrilhaByVideoId, Video, Trilha } from "@/config/trilhas";
-import { getCurrentUser, logout, hasAdminRole, AuthUser } from "@/lib/auth";
-import { ArrowLeft, LogOut, Settings, User, Clock, Calendar, AlertCircle } from "lucide-react";
+import { useAuthContext } from "@/lib/context";
+import { ArrowLeft, Clock, Calendar, AlertCircle } from "lucide-react";
 
 export default function VideoPage() {
   const router = useRouter();
   const params = useParams();
   const videoId = params?.id as string;
+  const { user: currentUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
 
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [video, setVideo] = useState<Video | null>(null);
   const [trilha, setTrilha] = useState<Trilha | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
+    if (authLoading) return;
+
+    if (!isAuthenticated || !currentUser) {
       router.push("/login");
       return;
     }
-    setCurrentUser(user);
 
     // Buscar dados do vídeo e trilha
     const loadVideoData = async () => {
@@ -62,7 +63,7 @@ export default function VideoPage() {
     };
 
     loadVideoData();
-  }, [router, videoId]);
+  }, [router, videoId, isAuthenticated, currentUser, authLoading]);
 
   useEffect(() => {
     if (!isLoading && error) {
@@ -73,25 +74,14 @@ export default function VideoPage() {
     }
   }, [isLoading, error, router]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
-
-  const handleBack = () => {
-    router.push("/dashboard");
-  };
-
-  const handleAdminAccess = () => {
-    router.push("/admin/users");
-  };
-
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Carregando vídeo...</p>
+          <p className="mt-4 text-muted-foreground">
+            {authLoading ? 'Carregando autenticação...' : 'Carregando vídeo...'}
+          </p>
         </div>
       </div>
     );
@@ -113,56 +103,17 @@ export default function VideoPage() {
     );
   }
 
-  const isAdmin = hasAdminRole();
   const videoIndex = trilha.videos.findIndex(v => v.id === videoId);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleBack}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
-            </Button>
-            <div className="hidden md:block">
-              <Badge variant="outline">{trilha.title}</Badge>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2">
-              <User className="w-4 h-4" />
-              <span className="text-sm font-medium">{currentUser?.name}</span>
-              <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs">
-                {isAdmin ? "Admin" : "Usuário"}
-              </Badge>
-            </div>
-
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAdminAccess}
-                className="hidden md:flex"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Admin
-              </Button>
-            )}
-
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Portal do Corretor">
+        <Badge variant="outline">{trilha.title}</Badge>
+        <Badge variant="outline">
+          Vídeo {videoIndex + 1} de {trilha.videos.length}
+        </Badge>
+      </AppHeader>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">

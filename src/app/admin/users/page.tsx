@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { UserManagement } from '@/components/admin/UserManagement';
-import { ArrowLeft, Users, Settings, Shield, LogOut } from 'lucide-react';
+import { AppHeader } from '@/components/AppHeader';
+import { Users, ArrowLeft } from 'lucide-react';
 
 export default function UsersManagementPage() {
-  const { isAuthenticated, isLoading, isManager, user, logout } = useAuthContext();
+  const { isAuthenticated, isLoading, isManager } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -27,11 +27,6 @@ export default function UsersManagementPage() {
     }
   }, [isAuthenticated, isLoading, isManager, router]);
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -47,43 +42,22 @@ export default function UsersManagementPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/admin')}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Painel Admin
-            </Button>
-
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Settings className="h-4 w-4" />
-              Admin
-              <span>/</span>
-              <Users className="h-4 w-4" />
-              Usuários
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2">
-              <span className="text-sm font-medium">{user?.name}</span>
-              <Badge variant="default" className="text-xs">
-                <Shield className="w-3 h-3 mr-1" />
-                Manager
-              </Badge>
-            </div>
-
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
+      <AppHeader title="Gerenciamento de Usuários">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/admin')}
+            className="p-0 h-auto"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Painel Admin
+          </Button>
+          <span>/</span>
+          <Users className="h-4 w-4" />
+          Usuários
         </div>
-      </header>
+      </AppHeader>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">

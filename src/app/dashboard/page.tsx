@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoCard } from "@/components/VideoCard";
+import { AppHeader } from "@/components/AppHeader";
 import { Trilha, getTrilhas } from "@/config/trilhas";
 import { useAuthContext } from "@/lib/context";
-import { LogOut, Settings, User, Play, BookOpen, AlertCircle, RefreshCw } from "lucide-react";
+import { Play, BookOpen, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user: currentUser, isAuthenticated, logout, isManager, isLoading: authLoading } = useAuthContext();
+  const { user: currentUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [isLoadingTrilhas, setIsLoadingTrilhas] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,15 +51,6 @@ export default function DashboardPage() {
 
     loadTrilhas();
   }, [router, isAuthenticated, currentUser, authLoading]);
-
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
-
-  const handleAdminAccess = () => {
-    router.push("/admin/users");
-  };
 
   const handleRefreshTrilhas = async () => {
     try {
@@ -104,67 +96,24 @@ export default function DashboardPage() {
   }
 
   const totalVideos = trilhas.reduce((acc, trilha) => acc + trilha.videos.length, 0);
-  const isAdmin = isManager();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-primary" />
-              Portal do Corretor
-            </h1>
-            <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
-              <Badge variant="outline">
-                {trilhas.length} trilha{trilhas.length !== 1 ? 's' : ''}
-              </Badge>
-              <Badge variant="outline">
-                <Play className="w-3 h-3 mr-1" />
-                {totalVideos} vídeo{totalVideos !== 1 ? 's' : ''}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshTrilhas}
-              disabled={isLoadingTrilhas}
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingTrilhas ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
-
-            <div className="hidden md:flex items-center gap-2">
-              <User className="w-4 h-4" />
-              <span className="text-sm font-medium">{currentUser?.name}</span>
-              <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs">
-                {isAdmin ? "Admin" : "Usuário"}
-              </Badge>
-            </div>
-
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAdminAccess}
-                className="hidden md:flex"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Administração
-              </Button>
-            )}
-
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        showBackToDashboard={false}
+        showRefresh={true}
+        onRefresh={handleRefreshTrilhas}
+        isRefreshing={isLoadingTrilhas}
+      >
+        <Badge variant="outline">
+          {trilhas.length} trilha{trilhas.length !== 1 ? 's' : ''}
+        </Badge>
+        <Badge variant="outline">
+          <Play className="w-3 h-3 mr-1" />
+          {totalVideos} vídeo{totalVideos !== 1 ? 's' : ''}
+        </Badge>
+      </AppHeader>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">

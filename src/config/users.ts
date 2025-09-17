@@ -29,8 +29,12 @@ const convertApiUserToUser = (apiUser: ApiUser): User => {
     name: apiUser.name,
     email: apiUser.email,
     role: apiUser.role === 'manager' ? 'admin' : 'user',
-    createdAt: new Date(apiUser.createdAt).toISOString().split('T')[0],
-    lastLogin: new Date(apiUser.updatedAt).toISOString().split('T')[0]
+    createdAt: apiUser.createdAt 
+      ? new Date(apiUser.createdAt).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0],
+    lastLogin: apiUser.updatedAt 
+      ? new Date(apiUser.updatedAt).toISOString().split('T')[0] 
+      : undefined
   };
 };
 
