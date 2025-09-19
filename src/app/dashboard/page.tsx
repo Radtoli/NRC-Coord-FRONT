@@ -8,7 +8,7 @@ import { VideoCard } from "@/components/VideoCard";
 import { AppHeader } from "@/components/AppHeader";
 import { Trilha, getTrilhas } from "@/config/trilhas";
 import { useAuthContext } from "@/lib/context";
-import { Play, BookOpen, AlertCircle, RefreshCw } from "lucide-react";
+import { Play, BookOpen, AlertCircle, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -134,6 +134,21 @@ export default function DashboardPage() {
                 <Play className="w-3 h-3 mr-1" />
                 {totalVideos} vídeo{totalVideos !== 1 ? 's' : ''}
               </Badge>
+            </div>
+          </div>
+
+          {/* Ações Rápidas */}
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4 text-center">Ferramentas</h3>
+            <div className="flex justify-center">
+              <Button
+                onClick={() => router.push('/plagio')}
+                className="flex items-center gap-2"
+                size="lg"
+              >
+                <Search className="w-5 h-5" />
+                Detector de Plágio
+              </Button>
             </div>
           </div>
 
