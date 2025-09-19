@@ -44,7 +44,6 @@ export const login = async (email: string, password: string): Promise<{ success:
       return { success: false, error: response.message || 'Erro no login' };
     }
   } catch (error) {
-    console.error('Login error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro no servidor'

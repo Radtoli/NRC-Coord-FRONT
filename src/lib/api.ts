@@ -1,10 +1,5 @@
-// Configuração base da API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-console.log('[DEBUG API] Environment API URL:', process.env.NEXT_PUBLIC_API_URL);
-console.log('[DEBUG API] Final API_BASE_URL:', API_BASE_URL);
-
-// Interface para responses da API
 interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
@@ -24,7 +19,6 @@ class ApiClient {
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
-    console.log('[DEBUG API] ApiClient initialized with baseURL:', baseURL);
   }
 
   private getAuthToken(): string | null {
@@ -57,18 +51,9 @@ class ApiClient {
     const url = `${normalizedBaseURL}${normalizedEndpoint}`;
     const token = this.getAuthToken();
 
-    // Log para debug
-    console.log('[DEBUG API] Original Base URL:', this.baseURL);
-    console.log('[DEBUG API] Normalized Base URL:', normalizedBaseURL);
-    console.log('[DEBUG API] Original Endpoint:', endpoint);
-    console.log('[DEBUG API] Normalized Endpoint:', normalizedEndpoint);
-    console.log('[DEBUG API] Final URL:', url);
-
-    // Validação adicional da URL
     try {
       new URL(url);
-    } catch (urlError) {
-      console.error('[DEBUG API] Invalid URL constructed:', url, urlError);
+    } catch {
       throw new Error(`URL inválida construída: ${url}`);
     }
 
@@ -104,15 +89,10 @@ class ApiClient {
       const response = await fetch(url, config);
 
       const data = await response.json();
-      console.log('[DEBUG API] Response status:', response.status);
-      console.log('[DEBUG API] Response data:', data);
 
-      // Se é erro 401 e NÃO é rota de login, limpar autenticação
       if (response.status === 401 && !endpoint.includes('/auth/login')) {
         if (typeof window !== 'undefined') {
-          console.log('[DEBUG API] 401 error on non-login route, clearing auth');
           localStorage.removeItem('auth');
-          // Apenas redirecionar se não estivermos já na página de login
           if (window.location.pathname !== '/login') {
             window.location.href = '/login';
           }
@@ -126,7 +106,6 @@ class ApiClient {
 
       return data;
     } catch (error) {
-      console.error('[DEBUG API] API Error:', error);
       throw error;
     }
   }

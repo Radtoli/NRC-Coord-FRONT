@@ -9,18 +9,6 @@ interface AuthState {
   isLoading: boolean;
 }
 
-// Debug function
-const debugAuth = (context: string) => {
-  const authData = localStorage.getItem('auth');
-  console.log(`[DEBUG ${context}] Auth data:`, authData ? JSON.parse(authData) : null);
-  if (authData) {
-    const user = JSON.parse(authData);
-    if (user.token) {
-      console.log(`[DEBUG ${context}] Token expired:`, isTokenExpired(user.token));
-    }
-  }
-};
-
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -30,12 +18,9 @@ export const useAuth = () => {
 
   useEffect(() => {
     const initAuth = () => {
-      debugAuth('INIT_AUTH');
       try {
-        // Primeiro, vamos apenas verificar se há dados no localStorage sem validar token
         const authData = localStorage.getItem('auth');
         if (!authData) {
-          console.log('[DEBUG INIT_AUTH] No auth data found');
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -46,7 +31,6 @@ export const useAuth = () => {
 
         const userData = JSON.parse(authData);
         if (!userData.token) {
-          console.log('[DEBUG INIT_AUTH] No token found');
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -55,9 +39,7 @@ export const useAuth = () => {
           return;
         }
 
-        // Verificar se o token está expirado
         if (isTokenExpired(userData.token)) {
-          console.log('[DEBUG INIT_AUTH] Token is expired, clearing data');
           localStorage.removeItem('auth');
           setAuthState({
             user: null,
@@ -67,7 +49,6 @@ export const useAuth = () => {
           return;
         }
 
-        // Token válido, definir usuário autenticado
         const user: AuthUser = {
           _id: userData._id,
           name: userData.name,
@@ -75,14 +56,12 @@ export const useAuth = () => {
           role: userData.role
         };
 
-        console.log('[DEBUG INIT_AUTH] Setting authenticated user:', user);
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
-      } catch (error) {
-        console.error('Error initializing auth:', error);
+      } catch {
         localStorage.removeItem('auth');
         setAuthState({
           user: null,
@@ -108,7 +87,6 @@ export const useAuth = () => {
         try {
           const user = JSON.parse(authData);
           if (user.token && isTokenExpired(user.token)) {
-            console.log('Token expired, logging out user');
             authService.logout();
             setAuthState({
               user: null,
@@ -116,8 +94,7 @@ export const useAuth = () => {
               isLoading: false,
             });
           }
-        } catch (error) {
-          console.error('Error checking token expiration:', error);
+        } catch {
         }
       }
     }, 60000); // Verificar a cada minuto
@@ -133,9 +110,7 @@ export const useAuth = () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
 
-      console.log('[DEBUG LOGIN] Starting login process');
       const response = await authService.login({ email, password });
-      console.log('[DEBUG LOGIN] Login response:', response);
 
       if (response.success && response.data) {
         const user: AuthUser = {
@@ -147,22 +122,18 @@ export const useAuth = () => {
             : (response.data.user.role || 'user')
         };
 
-        console.log('[DEBUG LOGIN] Setting authenticated user:', user);
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
 
-        debugAuth('AFTER_LOGIN');
         return { success: true, user };
       } else {
-        console.log('[DEBUG LOGIN] Login failed:', response.message);
         setAuthState(prev => ({ ...prev, isLoading: false }));
         return { success: false, error: response.message || 'Erro no login' };
       }
     } catch (error) {
-      console.error('[DEBUG LOGIN] Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return {
         success: false,

@@ -41,9 +41,6 @@ const getFileColor = (type: Document['type']) => {
 
 export function DownloadDocs({ documents, className }: DownloadDocsProps) {
   const handleDownload = (document: Document) => {
-    // Em uma aplicação real, aqui faria o download do arquivo
-    console.log(`Downloading ${document.title}`);
-    // Simula o download abrindo o link
     window.open(document.url, '_blank');
   };
 

@@ -50,7 +50,6 @@ export const getUsers = async (): Promise<User[]> => {
     const response = await userService.listUsers();
 
     if (!response.success || !response.data) {
-      console.error('Erro ao buscar usuários:', response.message);
       return [];
     }
 
@@ -61,8 +60,7 @@ export const getUsers = async (): Promise<User[]> => {
     cacheTimestamp = now;
 
     return users;
-  } catch (error) {
-    console.error('Erro ao buscar usuários da API:', error);
+  } catch {
     return [];
   }
 };
@@ -76,8 +74,7 @@ export const getUserById = async (id: string): Promise<User | undefined> => {
     }
 
     return convertApiUserToUser(response.data);
-  } catch (error) {
-    console.error('Erro ao buscar usuário:', error);
+  } catch {
     return undefined;
   }
 };
@@ -86,8 +83,7 @@ export const getUserByEmail = async (email: string): Promise<User | undefined> =
   try {
     const users = await getUsers();
     return users.find(user => user.email === email);
-  } catch (error) {
-    console.error('Erro ao buscar usuário por email:', error);
+  } catch {
     return undefined;
   }
 };

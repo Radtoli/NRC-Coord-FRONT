@@ -85,7 +85,6 @@ export function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswordFormPr
         setError(response.message || "Erro ao alterar senha");
       }
     } catch (error: unknown) {
-      console.error("Erro ao alterar senha:", error);
       const errorMessage = error instanceof Error ? error.message : "Erro interno. Tente novamente.";
       setError(errorMessage);
     } finally {

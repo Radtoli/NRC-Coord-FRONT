@@ -30,7 +30,6 @@ export const getTrilhas = async (): Promise<Trilha[]> => {
     const trilhasResponse = await trilhaService.listTrilhas();
 
     if (!trilhasResponse.success || !trilhasResponse.data) {
-      console.error('Erro ao buscar trilhas:', trilhasResponse.message);
       return [];
     }
 
@@ -59,8 +58,7 @@ export const getTrilhas = async (): Promise<Trilha[]> => {
     cacheTimestamp = now;
 
     return trilhas;
-  } catch (error) {
-    console.error('Erro ao buscar trilhas da API:', error);
+  } catch {
     return [];
   }
 };
@@ -81,8 +79,7 @@ export const getVideoById = async (id: string): Promise<Video | undefined> => {
     );
 
     return convertApiVideoToVideo(response.data, videoDocuments);
-  } catch (error) {
-    console.error('Erro ao buscar vídeo:', error);
+  } catch {
     return undefined;
   }
 };
@@ -93,8 +90,7 @@ export const getTrilhaByVideoId = async (videoId: string): Promise<Trilha | unde
     return trilhas.find(trilha =>
       trilha.videos.some(video => video.id === videoId)
     );
-  } catch (error) {
-    console.error('Erro ao buscar trilha por vídeo:', error);
+  } catch {
     return undefined;
   }
 };

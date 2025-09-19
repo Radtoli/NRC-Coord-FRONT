@@ -19,30 +19,22 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Esperar o loading de auth terminar antes de verificar autenticação
     if (authLoading) {
-      console.log('[DEBUG DASHBOARD] Auth still loading...');
       return;
     }
 
     if (!isAuthenticated || !currentUser) {
-      console.log('[DEBUG DASHBOARD] Not authenticated, redirecting to login');
       router.push("/login");
       return;
     }
-
-    console.log('[DEBUG DASHBOARD] User authenticated:', currentUser);
 
     const loadTrilhas = async () => {
       try {
         setIsLoadingTrilhas(true);
         setError(null);
-        console.log('[DEBUG DASHBOARD] Loading trilhas...');
         const trilhasData = await getTrilhas();
-        console.log('[DEBUG DASHBOARD] Trilhas loaded:', trilhasData);
         setTrilhas(trilhasData);
-      } catch (error) {
-        console.error('Erro ao carregar trilhas:', error);
+      } catch {
         setError('Erro ao carregar dados. Tente novamente.');
       } finally {
         setIsLoadingTrilhas(false);
@@ -58,8 +50,7 @@ export default function DashboardPage() {
       setError(null);
       const trilhasData = await getTrilhas();
       setTrilhas(trilhasData);
-    } catch (error) {
-      console.error('Erro ao carregar trilhas:', error);
+    } catch {
       setError('Erro ao carregar dados. Tente novamente.');
     } finally {
       setIsLoadingTrilhas(false);

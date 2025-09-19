@@ -133,7 +133,6 @@ export default function PlagioPage() {
         setResultadoConsulta(null); // Não exibir nada se não há resultados
       }
     } catch (error) {
-      console.error('Erro na consulta:', error);
       setErro(error instanceof Error ? error.message : 'Erro ao realizar consulta');
     } finally {
       setIsConsultando(false);
@@ -169,7 +168,6 @@ export default function PlagioPage() {
         });
       }
     } catch (error) {
-      console.error('Erro ao adicionar:', error);
       setErro(error instanceof Error ? error.message : 'Erro ao adicionar questão');
     } finally {
       setIsAdicionando(false);

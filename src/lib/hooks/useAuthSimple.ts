@@ -64,8 +64,7 @@ export const useAuthSimple = () => {
           isAuthenticated: true,
           isLoading: false,
         });
-      } catch (error) {
-        console.error('[DEBUG SIMPLE] Error initializing auth:', error);
+      } catch {
         setAuthState({
           user: null,
           isAuthenticated: false,
@@ -116,7 +115,6 @@ export const useAuthSimple = () => {
         return { success: false, error: response.message || 'Erro no login' };
       }
     } catch (error) {
-      console.error('[DEBUG SIMPLE] Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return {
         success: false,

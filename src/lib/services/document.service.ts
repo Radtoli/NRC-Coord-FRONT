@@ -37,8 +37,7 @@ export const documentService = {
       return responses
         .filter(response => response.success && response.data)
         .map(response => response.data!);
-    } catch (error) {
-      console.error('Error fetching documents by IDs:', error);
+    } catch {
       return [];
     }
   }
