@@ -3,6 +3,7 @@ export { authService, userService } from './auth.service';
 export { videoService } from './video.service';
 export { trilhaService } from './trilha.service';
 export { documentService } from './document.service';
+export { embeddingService } from './embedding.service';
 
 // Re-exportar tipos da API
 export type {
@@ -20,5 +21,9 @@ export type {
   CreateTrilhaRequest,
   UpdateTrilhaRequest,
   CreateDocumentRequest,
-  UpdateDocumentRequest
+  UpdateDocumentRequest,
+  AddDocumentRequest,
+  SearchDocumentRequest,
+  EmbeddingDocumentResult,
+  SearchResult
 } from '../api';

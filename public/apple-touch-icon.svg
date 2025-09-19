@@ -1,0 +1,18 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners for iOS -->
+  <rect width="180" height="180" rx="20" fill="#1e40af"/>
+  
+  <!-- Main circle -->
+  <circle cx="90" cy="90" r="70" fill="#2563eb" stroke="#ffffff" stroke-width="4"/>
+  
+  <!-- NRC letters -->
+  <text x="90" y="105" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">NRC</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="90" cy="50" r="8" fill="#fbbf24"/>
+  <rect x="50" y="130" width="80" height="6" rx="3" fill="#10b981"/>
+  
+  <!-- Additional accent lines -->
+  <line x1="40" y1="70" x2="140" y2="70" stroke="#60a5fa" stroke-width="2" opacity="0.6"/>
+  <line x1="40" y1="110" x2="140" y2="110" stroke="#60a5fa" stroke-width="2" opacity="0.6"/>
+</svg>

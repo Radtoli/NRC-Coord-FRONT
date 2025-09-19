@@ -1,0 +1,21 @@
+{
+  "name": "Portal de Treinamento NRC",
+  "short_name": "NRC Portal",
+  "description": "Portal de treinamento para corretores do NRC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ]
+}

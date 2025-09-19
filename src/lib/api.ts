@@ -262,4 +262,38 @@ export interface UpdateDocumentRequest {
   video?: string;
 }
 
+// DTOs para Embedding/Vector Database
+export interface AddDocumentRequest {
+  text: string;
+  provaId: string;
+  tipoProva: string;
+  numeroQuestao: number;
+}
+
+export interface SearchDocumentRequest {
+  query: string;
+  provaId: string;
+  tipoProva: string;
+  numeroQuestao: number;
+  limit?: number;
+}
+
+export interface EmbeddingDocumentResult {
+  success: boolean;
+  id: string;
+}
+
+export interface SearchResult {
+  id: string | number;
+  score: number;
+  payload: {
+    provaId: string;
+    tipoProva: string;
+    numeroQuestao: number;
+    text: string;
+    createdAt: string;
+    originalId?: string;
+  };
+}
+
 export type { ApiResponse, ApiError };
