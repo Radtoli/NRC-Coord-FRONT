@@ -39,13 +39,6 @@ const getMaxQuestoes = (tipoProva: TipoProva): number => {
 interface SearchResult {
   id: string | number;
   score: number;
-  payload: {
-    provaId: string;
-    tipoProva: string;
-    numeroQuestao: number;
-    text: string;
-    createdAt: string;
-  };
 }
 
 interface SearchResponse {
@@ -57,8 +50,8 @@ interface SearchResponse {
 interface AddResponse {
   success: boolean;
   data: {
-    id: string;
     success: boolean;
+    id: string;
   };
   message: string;
 }
@@ -93,7 +86,6 @@ export default function PlagioPage() {
   const [mensagemAdicionar, setMensagemAdicionar] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Redirect se não estiver logado
   if (!isAuthenticated) {
     router.push("/login");
     return null;
@@ -124,7 +116,7 @@ export default function PlagioPage() {
 
         if (resultadoSimilar) {
           setResultadoConsulta(
-            `⚠️ Possível plágio detectado! Prova similar encontrada: ${resultadoSimilar.payload.provaId} (Similaridade: ${(resultadoSimilar.score * 100).toFixed(1)}%)`
+            `⚠️ Possível plágio detectado! Documento similar encontrado: ID ${resultadoSimilar.id} (Similaridade: ${(resultadoSimilar.score * 100).toFixed(1)}%)`
           );
         } else {
           setResultadoConsulta(null); // Não exibir nada se não há similaridade alta

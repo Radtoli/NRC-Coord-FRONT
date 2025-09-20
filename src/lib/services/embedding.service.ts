@@ -11,7 +11,7 @@ export const embeddingService = {
   // Adicionar documento ao banco de vetores
   async addDocument(request: AddDocumentRequest): Promise<ApiResponse<EmbeddingDocumentResult>> {
     try {
-      const response = await api.post<ApiResponse<EmbeddingDocumentResult>>('/embedding/add', request);
+      const response = await api.post<ApiResponse<EmbeddingDocumentResult>>('/embedding/add-document', request);
       return response;
     } catch (error) {
       throw error;
@@ -21,7 +21,7 @@ export const embeddingService = {
   // Buscar documentos similares
   async searchDocuments(request: SearchDocumentRequest): Promise<ApiResponse<SearchResult[]>> {
     try {
-      const response = await api.post<ApiResponse<SearchResult[]>>('/embedding/search', request);
+      const response = await api.post<ApiResponse<SearchResult[]>>('/embedding/search-documents', request);
       return response;
     } catch (error) {
       throw error;

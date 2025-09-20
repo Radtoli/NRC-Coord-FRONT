@@ -268,33 +268,13 @@ export const EmbeddingTest: React.FC<EmbeddingTestProps> = ({ className }) => {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 gap-4 text-sm text-gray-600">
                     <div>
                       <span className="font-medium">ID:</span> {result.id}
                     </div>
                     <div>
-                      <span className="font-medium">Prova:</span> {result.payload.provaId}
+                      <span className="font-medium">Similaridade:</span> {(result.score * 100).toFixed(2)}%
                     </div>
-                    <div>
-                      <span className="font-medium">Tipo:</span> {result.payload.tipoProva}
-                    </div>
-                    <div>
-                      <span className="font-medium">Questão:</span> {result.payload.numeroQuestao}
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-sm">Texto:</span>
-                    <p className="text-sm mt-1 p-2 bg-gray-50 rounded">
-                      {result.payload.text}
-                    </p>
-                  </div>
-
-                  <div className="text-xs text-gray-500">
-                    Criado em: {new Date(result.payload.createdAt).toLocaleString()}
-                    {result.payload.originalId && (
-                      <span className="ml-4">ID Original: {result.payload.originalId}</span>
-                    )}
                   </div>
                 </div>
               ))}

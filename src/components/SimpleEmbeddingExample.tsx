@@ -88,12 +88,11 @@ export const SimpleEmbeddingExample: React.FC = () => {
                 {searchResults.map((result, index) => (
                   <div key={result.id} className="bg-gray-50 p-3 rounded border">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm font-medium">#{index + 1}</span>
+                      <span className="text-sm font-medium">#{index + 1} - ID: {result.id}</span>
                       <span className="text-xs bg-blue-100 px-2 py-1 rounded">
                         {(result.score * 100).toFixed(1)}% similar
                       </span>
                     </div>
-                    <p className="text-sm">{result.payload.text}</p>
                   </div>
                 ))}
               </div>

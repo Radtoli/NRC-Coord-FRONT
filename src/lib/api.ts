@@ -286,14 +286,6 @@ export interface EmbeddingDocumentResult {
 export interface SearchResult {
   id: string | number;
   score: number;
-  payload: {
-    provaId: string;
-    tipoProva: string;
-    numeroQuestao: number;
-    text: string;
-    createdAt: string;
-    originalId?: string;
-  };
 }
 
 export type { ApiResponse, ApiError };
