@@ -7,18 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { documentService } from "@/lib/services";
-import { Document as ApiDocument } from "@/lib/services";
+import { documentService, videoService } from "@/lib/services";
+import { Document as ApiDocument, Video } from "@/lib/services";
 import { Plus, Edit, Trash2, FileText, RefreshCw, AlertCircle, ExternalLink, Download } from "lucide-react";
 
 interface DocumentFormData {
   title: string;
   type: string;
   url: string;
+  video: string;
 }
 
 export function DocumentManagement() {
   const [documents, setDocuments] = useState<ApiDocument[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -27,7 +29,8 @@ export function DocumentManagement() {
   const [formData, setFormData] = useState<DocumentFormData>({
     title: "",
     type: "",
-    url: ""
+    url: "",
+    video: ""
   });
 
   useEffect(() => {
@@ -39,15 +42,22 @@ export function DocumentManagement() {
       setIsLoading(true);
       setError("");
 
-      const response = await documentService.listDocuments();
+      const [documentsResponse, videosResponse] = await Promise.all([
+        documentService.listDocuments(),
+        videoService.listVideos()
+      ]);
 
-      if (response.success && response.data) {
-        setDocuments(response.data);
+      if (documentsResponse.success && documentsResponse.data) {
+        setDocuments(documentsResponse.data);
       } else {
         setError("Erro ao carregar documentos");
       }
+
+      if (videosResponse.success && videosResponse.data) {
+        setVideos(videosResponse.data);
+      }
     } catch (error) {
-      console.error("Erro ao carregar documentos:", error);
+      console.error("Erro ao carregar dados:", error);
       setError("Erro ao conectar com o servidor");
     } finally {
       setIsLoading(false);
@@ -78,7 +88,8 @@ export function DocumentManagement() {
         title: formData.title,
         type: formData.type,
         url: formData.url,
-        size: "unknown" // Placeholder já que não temos como determinar o tamanho sem fazer o download
+        size: "unknown", // Placeholder já que não temos como determinar o tamanho sem fazer o download
+        video: formData.video || undefined
       };
 
       if (editingDocument) {
@@ -115,7 +126,8 @@ export function DocumentManagement() {
     setFormData({
       title: document.title,
       type: document.type,
-      url: document.url
+      url: document.url,
+      video: document.video || ""
     });
     setIsDialogOpen(true);
     setError("");
@@ -144,7 +156,7 @@ export function DocumentManagement() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingDocument(null);
-    setFormData({ title: "", type: "", url: "" });
+    setFormData({ title: "", type: "", url: "", video: "" });
     setError("");
   };
 
@@ -204,7 +216,7 @@ export function DocumentManagement() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingDocument(null); setFormData({ title: "", type: "", url: "" }); setError(""); }}>
+            <Button onClick={() => { setEditingDocument(null); setFormData({ title: "", type: "", url: "", video: "" }); setError(""); }}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Documento
             </Button>
@@ -281,6 +293,27 @@ export function DocumentManagement() {
                     URL completa para o arquivo hospedado externamente
                   </p>
                 </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="video">Vídeo Relacionado (Opcional)</Label>
+                  <select
+                    id="video"
+                    value={formData.video}
+                    onChange={(e) => setFormData({ ...formData, video: e.target.value })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isSubmitting}
+                  >
+                    <option value="">Nenhum vídeo selecionado</option>
+                    {videos.map((video) => (
+                      <option key={video._id} value={video._id}>
+                        {video.title}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    Selecione um vídeo para vincular este documento
+                  </p>
+                </div>
               </div>
 
               <DialogFooter>
@@ -332,6 +365,7 @@ export function DocumentManagement() {
               <TableHead>Documento</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Tamanho</TableHead>
+              <TableHead>Vídeo Relacionado</TableHead>
               <TableHead className="text-center">Criado em</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -339,7 +373,7 @@ export function DocumentManagement() {
           <TableBody>
             {documents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground">Nenhum documento cadastrado</p>
                   <p className="text-sm text-muted-foreground">
@@ -374,6 +408,17 @@ export function DocumentManagement() {
                     <span className="text-sm text-muted-foreground">
                       {formatFileSize(document.size)}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    {document.video ? (
+                      <span className="text-sm">
+                        {videos.find(v => v._id === document.video)?.title || 'Vídeo não encontrado'}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Nenhum vídeo
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {new Date(document.createdAt).toLocaleDateString('pt-BR')}

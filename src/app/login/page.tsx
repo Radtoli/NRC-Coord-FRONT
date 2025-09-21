@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthContext } from "@/lib/context";
-import { DebugPanel } from "@/components/DebugPanel";
 import { LogIn, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
@@ -20,12 +19,6 @@ export default function LoginPage() {
     email: "",
     password: ""
   });
-
-  // Debug das variáveis de ambiente
-  console.log('[DEBUG LOGIN] Environment variables:');
-  console.log('[DEBUG LOGIN] NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-  console.log('[DEBUG LOGIN] Current window location:', typeof window !== 'undefined' ? window.location.href : 'SSR');
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -50,12 +43,6 @@ export default function LoginPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (error) setError("");
   };
-
-  // Dados de exemplo para demonstração
-  const exampleCredentials = [
-    { email: "joao.silva@empresa.com", password: "123456", role: "Admin" },
-    { email: "maria.santos@empresa.com", password: "123456", role: "Usuário" }
-  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
@@ -148,30 +135,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Credenciais de exemplo para demonstração */}
-        <Card className="bg-muted/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Credenciais de Demonstração</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {exampleCredentials.map((cred, index) => (
-              <div
-                key={index}
-                className="p-3 bg-background rounded-md border cursor-pointer hover:bg-accent transition-colors"
-                onClick={() => setFormData({ email: cred.email, password: cred.password })}
-              >
-                <div className="text-sm font-medium">{cred.role}</div>
-                <div className="text-xs text-muted-foreground">{cred.email}</div>
-                <div className="text-xs text-muted-foreground">Senha: {cred.password}</div>
-              </div>
-            ))}
-            <p className="text-xs text-muted-foreground">
-              Clique em qualquer credencial para preenchimento automático
-            </p>
-          </CardContent>
-        </Card>
       </div>
-      <DebugPanel />
     </div>
   );
 }

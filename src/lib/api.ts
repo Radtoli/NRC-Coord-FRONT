@@ -188,6 +188,7 @@ export interface Document {
   type: string;
   url: string;
   size: string;
+  video?: string;
   createdAt: string;
   updatedAt: string;
 }
