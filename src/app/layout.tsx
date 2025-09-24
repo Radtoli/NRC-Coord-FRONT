@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   description: "Portal de treinamento para corretores do NRC",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-16x16.svg", sizes: "16x16", type: "image/svg+xml" }
+      { url: "/favicon.ico", type: "image/x-icon" },
+      { url: "/favicon-16x16.ico", sizes: "16x16", type: "image/x-icon" }
     ],
     apple: [
-      { url: "/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" }
+      { url: "/apple-touch-icon.ico", sizes: "180x180", type: "image/x-icon" }
     ]
   },
   manifest: "/manifest.json",
