@@ -23,6 +23,8 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useAuthContext } from '@/lib/context/AuthContext';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 interface User {
   _id: string;
   name: string;
@@ -85,7 +87,8 @@ export function UserManagement() {
       }
 
       const authData = JSON.parse(token);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+
+      const response = await fetch(`${API_URL}/users`, {
         headers: {
           'Authorization': `Bearer ${authData.token}`
         }
@@ -114,7 +117,8 @@ export function UserManagement() {
       }
 
       const authData = JSON.parse(token);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+
+      const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +161,7 @@ export function UserManagement() {
       }
 
       const authData = JSON.parse(token);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${selectedUser._id}`, {
+      const response = await fetch(`${API_URL}/users/${selectedUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +195,7 @@ export function UserManagement() {
       }
 
       const authData = JSON.parse(token);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+      const response = await fetch(`${API_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authData.token}`

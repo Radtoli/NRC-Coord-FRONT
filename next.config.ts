@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  output: 'standalone', // Necessário para Docker
 };
 
 export default nextConfig;
