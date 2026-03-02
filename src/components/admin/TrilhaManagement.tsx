@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { trilhaService, videoService } from "@/lib/services";
 import { Trilha as ApiTrilha, Video as ApiVideo } from "@/lib/services";
-import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate } from "lucide-react";
 
 interface TrilhaFormData {
   title: string;
@@ -181,8 +182,8 @@ export function TrilhaManagement() {
                   {editingTrilha ? "Editar Trilha" : "Nova Trilha"}
                 </DialogTitle>
                 <DialogDescription>
-                  {editingTrilha 
-                    ? "Altere os dados da trilha abaixo." 
+                  {editingTrilha
+                    ? "Altere os dados da trilha abaixo."
                     : "Preencha os dados para criar uma nova trilha de aprendizado."
                   }
                 </DialogDescription>
@@ -220,9 +221,9 @@ export function TrilhaManagement() {
               </div>
 
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleCloseDialog}
                   disabled={isSubmitting}
                 >
@@ -307,6 +308,11 @@ export function TrilhaManagement() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Button variant="outline" size="sm" asChild title="Editar conteúdo AVA">
+                        <Link href={`/ava/coordinator/course/${trilha._id}`}>
+                          <LayoutTemplate className="w-4 h-4" />
+                        </Link>
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
