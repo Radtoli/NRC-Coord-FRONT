@@ -104,7 +104,23 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
 
-      const data = await response.json();
+      // Tentar parsear como JSON; se falhar (ex: "Internal Server Error" em texto),
+      // usar null para não mascarar o erro original
+      let data: unknown = null;
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          // Se não for JSON, lança erro com o texto recebido
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${text.slice(0, 200)}`);
+          }
+        }
+      }
 
       if (response.status === 401 && !endpoint.includes('/auth/login')) {
         if (typeof window !== 'undefined') {
@@ -117,7 +133,10 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        throw new Error(data.message || `HTTP ${response.status}`);
+        const msg = (data && typeof data === 'object' && 'message' in data)
+          ? (data as { message: string }).message
+          : `HTTP ${response.status}`;
+        throw new Error(msg);
       }
 
       return data;
