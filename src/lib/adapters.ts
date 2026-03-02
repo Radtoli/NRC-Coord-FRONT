@@ -18,10 +18,6 @@ export interface Document {
   size: string;
 }
 
-
-
-
-
 export interface Trilha {
   id: string;
   title: string;

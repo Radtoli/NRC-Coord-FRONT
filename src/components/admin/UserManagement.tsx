@@ -22,8 +22,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useAuthContext } from '@/lib/context/AuthContext';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { api } from '@/lib/api';
 
 interface User {
   _id: string;
@@ -80,26 +79,8 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth');
-      if (!token) {
-        setError('Token não encontrado');
-        return;
-      }
-
-      const authData = JSON.parse(token);
-
-      const response = await fetch(`${API_URL}/users`, {
-        headers: {
-          'Authorization': `Bearer ${authData.token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.data || []);
-      } else {
-        setError('Erro ao carregar usuários');
-      }
+      const data = await api.get<{ data?: User[] }>('/users');
+      setUsers(data.data || []);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       setError('Erro ao conectar com o servidor');
@@ -110,107 +91,37 @@ export function UserManagement() {
 
   const createUser = async () => {
     try {
-      const token = localStorage.getItem('auth');
-      if (!token) {
-        setError('Token não encontrado');
-        return;
-      }
-
-      const authData = JSON.parse(token);
-
-      const response = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authData.token}`
-        },
-        body: JSON.stringify({
-          ...createForm,
-          createdBy: user?._id
-        })
-      });
-
-      if (response.ok) {
-        setIsCreateDialogOpen(false);
-        setCreateForm({
-          name: '',
-          email: '',
-          password: '',
-          demolayId: 0,
-          roles: ['user']
-        });
-        fetchUsers();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Erro ao criar usuário');
-      }
-    } catch (error) {
+      await api.post('/users', { ...createForm, createdBy: user?._id });
+      setIsCreateDialogOpen(false);
+      setCreateForm({ name: '', email: '', password: '', demolayId: 0, roles: ['user'] });
+      fetchUsers();
+    } catch (error: unknown) {
       console.error('Erro ao criar usuário:', error);
-      setError('Erro ao conectar com o servidor');
+      setError(error instanceof Error ? error.message : 'Erro ao criar usuário');
     }
   };
 
   const updateUser = async () => {
     if (!selectedUser) return;
-
     try {
-      const token = localStorage.getItem('auth');
-      if (!token) {
-        setError('Token não encontrado');
-        return;
-      }
-
-      const authData = JSON.parse(token);
-      const response = await fetch(`${API_URL}/users/${selectedUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authData.token}`
-        },
-        body: JSON.stringify(editForm)
-      });
-
-      if (response.ok) {
-        setIsEditDialogOpen(false);
-        setSelectedUser(null);
-        fetchUsers();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Erro ao atualizar usuário');
-      }
-    } catch (error) {
+      await api.put(`/users/${selectedUser._id}`, editForm);
+      setIsEditDialogOpen(false);
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (error: unknown) {
       console.error('Erro ao atualizar usuário:', error);
-      setError('Erro ao conectar com o servidor');
+      setError(error instanceof Error ? error.message : 'Erro ao atualizar usuário');
     }
   };
 
   const deleteUser = async (userId: string) => {
     if (!confirm('Tem certeza que deseja deletar este usuário?')) return;
-
     try {
-      const token = localStorage.getItem('auth');
-      if (!token) {
-        setError('Token não encontrado');
-        return;
-      }
-
-      const authData = JSON.parse(token);
-      const response = await fetch(`${API_URL}/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${authData.token}`
-        }
-      });
-
-      if (response.ok) {
-        fetchUsers();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Erro ao deletar usuário');
-      }
-    } catch (error) {
+      await api.delete(`/users/${userId}`);
+      fetchUsers();
+    } catch (error: unknown) {
       console.error('Erro ao deletar usuário:', error);
-      setError('Erro ao conectar com o servidor');
+      setError(error instanceof Error ? error.message : 'Erro ao deletar usuário');
     }
   };
 
