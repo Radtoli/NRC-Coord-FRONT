@@ -51,8 +51,11 @@ class ApiClient {
     const url = `${normalizedBaseURL}${normalizedEndpoint}`;
     const token = this.getAuthToken();
 
+    // Validar URL — URLs relativas (ex: /api-backend/...) são válidas no browser
+    // mas new URL() exige base quando não há scheme. Usar window.location.origin como base.
     try {
-      new URL(url);
+      const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+      new URL(url, base);
     } catch {
       throw new Error(`URL inválida construída: ${url}`);
     }
