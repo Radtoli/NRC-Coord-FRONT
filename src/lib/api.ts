@@ -64,13 +64,13 @@ class ApiClient {
     const url = `${normalizedBaseURL}${normalizedEndpoint}`;
     const token = this.getAuthToken();
 
-    // Validar URL — URLs relativas (ex: /api-backend/...) são válidas no browser
-    // mas new URL() exige base quando não há scheme. Usar window.location.origin como base.
-    try {
-      const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-      new URL(url, base);
-    } catch {
-      throw new Error(`URL inválida construída: ${url}`);
+    // Validar apenas URLs absolutas; relativas (/api-backend/...) são sempre válidas para o fetch
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      try {
+        new URL(url);
+      } catch {
+        throw new Error(`URL inválida construída: ${url}`);
+      }
     }
 
     const headers: Record<string, string> = {
@@ -139,7 +139,7 @@ class ApiClient {
         throw new Error(msg);
       }
 
-      return data;
+      return data as T;
     } catch (error) {
       throw error;
     }
