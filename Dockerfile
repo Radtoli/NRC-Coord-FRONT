@@ -21,6 +21,10 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copiar código fonte
 COPY . .
 
+# Receber build arg passado pelo docker-compose (NEXT_PUBLIC_* precisa existir em build time)
+ARG NEXT_PUBLIC_API_URL=/api-backend
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Definir variáveis de ambiente para build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
