@@ -1,4 +1,17 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Se NEXT_PUBLIC_API_URL for uma URL absoluta (http/https) ou um path relativo (/...),
+// usa o valor. Caso contrário (variável não injetada, ex: "NEXT_PUBLIC_API_URL=/api-backend"),
+// usa '/api-backend' no browser (proxy do Next.js) ou localhost no servidor.
+function resolveApiBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_API_URL ?? '';
+  if (env.startsWith('http://') || env.startsWith('https://') || env.startsWith('/')) {
+    return env;
+  }
+  // Fallback seguro: no browser usa o proxy configurado em next.config.ts
+  if (typeof window !== 'undefined') return '/api-backend';
+  return 'http://localhost:3001';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 interface ApiResponse<T = unknown> {
   success: boolean;
