@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { DocumentManagement } from '@/components/admin/DocumentManagement';
 import { TrilhaManagement } from '@/components/admin/TrilhaManagement';
 import { VideoManagement } from '@/components/admin/VideoManagement';
+import { QuizManagement } from '@/components/admin/QuizManagement';
+import { ExamBankManagement } from '@/components/admin/ExamBankManagement';
 import { AppHeader } from '@/components/AppHeader';
-import { FileText, Video, Users, BookOpen, Settings, ExternalLink } from 'lucide-react';
+import { FileText, Video, Users, BookOpen, Settings, ExternalLink, ClipboardList, Database } from 'lucide-react';
 
 export default function AdminPage() {
   const { isAuthenticated, isLoading, isManager } = useAuthContext();
@@ -70,7 +72,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Usuários
@@ -86,6 +88,14 @@ export default function AdminPage() {
             <TabsTrigger value="documents" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Documentos
+            </TabsTrigger>
+            <TabsTrigger value="quizzes" className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Questionários
+            </TabsTrigger>
+            <TabsTrigger value="banco-provas" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Banco de Provas
             </TabsTrigger>
           </TabsList>
 
@@ -155,6 +165,34 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <DocumentManagement />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="quizzes" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Questionários</CardTitle>
+                <CardDescription>
+                  Crie e gerencie questionários e suas questões
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QuizManagement />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="banco-provas" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Banco de Provas</CardTitle>
+                <CardDescription>
+                  Gerencie bancos de questões para as provas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExamBankManagement />
               </CardContent>
             </Card>
           </TabsContent>
