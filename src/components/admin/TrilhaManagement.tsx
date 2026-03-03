@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { trilhaService, videoService } from "@/lib/services";
 import { Trilha as ApiTrilha, Video as ApiVideo } from "@/lib/services";
-import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate, Eye } from "lucide-react";
 
 interface TrilhaFormData {
   title: string;
@@ -308,6 +308,11 @@ export function TrilhaManagement() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Button variant="outline" size="sm" asChild title="Visualizar como aluno">
+                        <Link href={`/ava/course/${trilha._id}`}>
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </Button>
                       <Button variant="outline" size="sm" asChild title="Editar conteúdo AVA">
                         <Link href={`/ava/coordinator/course/${trilha._id}`}>
                           <LayoutTemplate className="w-4 h-4" />
