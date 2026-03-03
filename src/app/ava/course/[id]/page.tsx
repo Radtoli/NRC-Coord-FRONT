@@ -87,7 +87,7 @@ export default function StudentCoursePage({ params }: Props) {
                   {pages.map((page, i) => (
                     <Link
                       key={page.id}
-                      href={`/ava/page/${page.id}`}
+                      href={`/ava/page/${page.id}?courseId=${course.id}&moduleId=${mod.id}`}
                       className="flex items-center gap-4 px-5 py-3.5 hover:bg-blue-50 transition"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">

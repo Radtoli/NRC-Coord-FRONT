@@ -245,7 +245,7 @@ function QuizQuestionsPanel({ quiz, onRefresh }: { quiz: Quiz; onRefresh: () => 
                     {q.options.map((opt) => (
                       <li key={opt.id} className={`text-xs pl-2 ${opt.isCorrect ? 'text-green-700 font-medium' : 'text-gray-500'}`}>
                         {opt.isCorrect ? '✓' : '○'} {opt.text}
-                        {opt.scoreWeight !== 1 && opt.scoreWeight !== 0 && ` (peso ${opt.scoreWeight})`}
+                        {q.questionType === 'weighted' && ` (peso ${Number(opt.scoreWeight).toFixed(2)})`}
                       </li>
                     ))}
                   </ul>
@@ -287,8 +287,8 @@ function AddQuizQuestionForm({
   const [qType, setQType] = useState<QType>('multiple_choice');
   const [axis, setAxis] = useState('');
   const [options, setOptions] = useState<OptionDraft[]>([
-    { text: '', isCorrect: false, scoreWeight: 1 },
-    { text: '', isCorrect: false, scoreWeight: 1 },
+    { text: '', isCorrect: false, scoreWeight: 0 },
+    { text: '', isCorrect: false, scoreWeight: 0 },
   ]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -330,7 +330,16 @@ function AddQuizQuestionForm({
         <select
           className="w-full rounded border p-2 text-sm"
           value={qType}
-          onChange={(e) => setQType(e.target.value as QType)}
+          onChange={(e) => {
+            setQType(e.target.value as QType);
+            setStatement('');
+            setAxis('');
+            setError(null);
+            setOptions([
+              { text: '', isCorrect: false, scoreWeight: 0 },
+              { text: '', isCorrect: false, scoreWeight: 0 },
+            ]);
+          }}
         >
           <option value="multiple_choice">Múltipla Escolha</option>
           <option value="open">Aberta</option>
@@ -379,11 +388,12 @@ function AddQuizQuestionForm({
                 />
                 {qType === 'weighted' && (
                   <input
-                    type="number" min={0} max={1} step={0.1}
-                    className="w-20 rounded border p-1.5 text-sm"
-                    title="Peso (0-1)"
+                    type="number" min={0} max={1} step={0.01}
+                    className="w-24 rounded border p-1.5 text-sm"
+                    title="Peso (0.0 – 1.0)"
+                    placeholder="0.00"
                     value={opt.scoreWeight}
-                    onChange={(e) => setOption(i, { scoreWeight: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setOption(i, { scoreWeight: parseFloat(e.target.value) ?? 0 })}
                   />
                 )}
                 {options.length > 2 && (
@@ -394,7 +404,7 @@ function AddQuizQuestionForm({
             ))}
             <button
               type="button"
-              onClick={() => setOptions((prev) => [...prev, { text: '', isCorrect: false, scoreWeight: 1 }])}
+              onClick={() => setOptions((prev) => [...prev, { text: '', isCorrect: false, scoreWeight: 0 }])}
               className="text-xs text-blue-600 hover:underline"
             >
               + Alternativa

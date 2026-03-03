@@ -13,7 +13,7 @@ const SECTION_LABELS: Record<SectionType, string> = {
   STORYTELLING: 'Storytelling',
   CASE_STUDY: 'Estudo de caso',
   QUIZ: 'Quiz',
-  MINDMAP: 'Mapa mental',
+  MINDMAP: 'Visualizador de Imagem',
   FINAL_MESSAGE: 'Mensagem final',
   DASHBOARD: 'Dashboard',
   EXAM_BANK: 'Prova',
@@ -99,7 +99,7 @@ function ContentEditor({
     case 'MINDMAP':
       return (
         <div className="space-y-3">
-          {field('imageUrl', 'URL da imagem do mapa')}
+          {field('imageUrl', 'URL da imagem (direta, Imgur, Google Drive, etc.)')}
           {field('description', 'Descrição')}
         </div>
       );
@@ -264,7 +264,7 @@ export function PageBuilder({ pageId }: Props) {
     STORYTELLING: 'Storytelling',
     CASE_STUDY: 'Estudo de caso',
     QUIZ: 'Quiz',
-    MINDMAP: 'Mapa mental',
+    MINDMAP: 'Visualizador de Imagem',
     FINAL_MESSAGE: 'Mensagem final',
     DASHBOARD: 'Dashboard',
     EXAM_BANK: 'Prova',

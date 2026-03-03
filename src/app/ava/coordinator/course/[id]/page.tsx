@@ -70,6 +70,20 @@ export default function CoordinatorCoursePage() {
     if (selectedCourse) await loadCourse(selectedCourse.id);
   }
 
+  async function handleDeleteCourse(courseId: string, courseTitle: string) {
+    if (!confirm(`Excluir o curso "${courseTitle}" e todo o seu conteúdo? Esta ação não pode ser desfeita.`)) return;
+    try {
+      await avaService.deleteCourse(courseId);
+      setAllCourses((prev) => prev.filter((c) => c.id !== courseId));
+      if (selectedCourse?.id === courseId) {
+        setSelectedCourse(null);
+        setStep('picking');
+      }
+    } catch (e: unknown) {
+      alert(errMsg(e));
+    }
+  }
+
   async function handleAddModule() {
     if (!newModuleTitle.trim() || !selectedCourse) return;
     try {
@@ -148,21 +162,32 @@ export default function CoordinatorCoursePage() {
           {allCourses.length > 0 && (
             <div className="mb-6 space-y-2">
               {allCourses.map((c) => (
-                <button
+                <div
                   key={c.id}
-                  onClick={() => loadCourse(c.id)}
-                  disabled={courseLoading}
-                  className="flex w-full items-center justify-between rounded-xl border bg-white px-5 py-4 text-left shadow-sm hover:border-blue-400 hover:bg-blue-50 disabled:opacity-50"
+                  className="flex w-full items-center justify-between rounded-xl border bg-white px-5 py-4 shadow-sm hover:border-blue-400 hover:bg-blue-50 gap-3"
                 >
-                  <div>
-                    <p className="font-medium text-gray-800">{c.title}</p>
-                    {c.description && <p className="mt-0.5 text-xs text-gray-500">{c.description}</p>}
-                  </div>
-                  <span className={`ml-4 rounded-full px-2 py-0.5 text-xs font-medium ${c.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                    {c.status === 'published' ? 'Publicado' : 'Rascunho'}
-                  </span>
-                </button>
+                  <button
+                    onClick={() => loadCourse(c.id)}
+                    disabled={courseLoading}
+                    className="flex flex-1 items-center justify-between text-left disabled:opacity-50"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-800">{c.title}</p>
+                      {c.description && <p className="mt-0.5 text-xs text-gray-500">{c.description}</p>}
+                    </div>
+                    <span className={`ml-4 rounded-full px-2 py-0.5 text-xs font-medium ${c.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                      {c.status === 'published' ? 'Publicado' : 'Rascunho'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteCourse(c.id, c.title); }}
+                    title="Excluir curso"
+                    className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-400 transition"
+                  >
+                    Excluir
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -206,10 +231,20 @@ export default function CoordinatorCoursePage() {
             ← Voltar
           </button>
           <h1 className="text-sm font-semibold text-gray-700">{selectedCourse?.title}</h1>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${selectedCourse?.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-            }`}>
-            {selectedCourse?.status === 'published' ? 'Publicado' : 'Rascunho'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${selectedCourse?.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+              }`}>
+              {selectedCourse?.status === 'published' ? 'Publicado' : 'Rascunho'}
+            </span>
+            {selectedCourse && (
+              <button
+                onClick={() => handleDeleteCourse(selectedCourse.id, selectedCourse.title)}
+                className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-400 transition"
+              >
+                Excluir curso
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -293,7 +328,7 @@ export default function CoordinatorCoursePage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Link
-                            href={`/ava/coordinator/page/${page.id}`}
+                            href={`/ava/coordinator/page/${page.id}?courseId=${selectedCourse?.id}`}
                             className="rounded px-3 py-1 text-xs text-blue-600 hover:bg-blue-50"
                           >
                             Editar conteúdo
