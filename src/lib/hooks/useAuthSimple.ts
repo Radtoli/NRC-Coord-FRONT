@@ -136,10 +136,15 @@ export const useAuthSimple = () => {
     return authState.user?.role === 'manager';
   };
 
+  const isCorretor = () => {
+    return authState.user?.role === 'corretor' || authState.user?.role === 'manager';
+  };
+
   return {
     ...authState,
     login,
     logout,
     isManager,
+    isCorretor,
   };
 };

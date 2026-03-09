@@ -47,7 +47,7 @@ interface UpdateUserData {
   name?: string;
   email?: string;
   demolayId?: number;
-  roles?: ('user' | 'manager')[];
+  roles?: ('user' | 'manager' | 'corretor')[];
 }
 
 export function UserManagement() {
@@ -228,11 +228,12 @@ export function UserManagement() {
                 <select
                   id="roles"
                   value={createForm.roles[0]}
-                  onChange={(e) => setCreateForm({ ...createForm, roles: [e.target.value as 'user' | 'manager'] })}
+                  onChange={(e) => setCreateForm({ ...createForm, roles: [e.target.value as 'user' | 'manager' | 'corretor'] })}
                   className="w-full p-2 border rounded"
                 >
                   <option value="user">Usuário</option>
                   <option value="manager">Administrador</option>
+                  <option value="corretor">Corretor</option>
                 </select>
               </div>
               <Button onClick={createUser} className="w-full">
@@ -262,8 +263,8 @@ export function UserManagement() {
               <TableCell>{user.demolayId}</TableCell>
               <TableCell>
                 {user.roles.map((role) => (
-                  <Badge key={role} variant={role === 'manager' ? 'default' : 'secondary'}>
-                    {role === 'manager' ? 'Admin' : 'Usuário'}
+                  <Badge key={role} variant={role === 'manager' ? 'default' : role === 'corretor' ? 'outline' : 'secondary'}>
+                    {role === 'manager' ? 'Admin' : role === 'corretor' ? 'Corretor' : 'Usuário'}
                   </Badge>
                 ))}
               </TableCell>
@@ -331,11 +332,12 @@ export function UserManagement() {
               <select
                 id="edit-roles"
                 value={editForm.roles?.[0] || 'user'}
-                onChange={(e) => setEditForm({ ...editForm, roles: [e.target.value as 'user' | 'manager'] })}
+                onChange={(e) => setEditForm({ ...editForm, roles: [e.target.value as 'user' | 'manager' | 'corretor'] })}
                 className="w-full p-2 border rounded"
               >
                 <option value="user">Usuário</option>
                 <option value="manager">Administrador</option>
+                <option value="corretor">Corretor</option>
               </select>
             </div>
             <Button onClick={updateUser} className="w-full">

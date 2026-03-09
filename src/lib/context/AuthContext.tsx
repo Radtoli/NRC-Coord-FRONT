@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
   logout: () => void;
   isManager: () => boolean;
+  isCorretor: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

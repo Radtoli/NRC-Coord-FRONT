@@ -89,6 +89,11 @@ export const authService = {
   isManager(): boolean {
     const user = this.getCurrentUser();
     return user?.role === 'manager';
+  },
+
+  isCorretor(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'corretor' || user?.role === 'manager';
   }
 };
 

@@ -12,7 +12,7 @@ import { VideoManagement } from '@/components/admin/VideoManagement';
 import { QuizManagement } from '@/components/admin/QuizManagement';
 import { ExamBankManagement } from '@/components/admin/ExamBankManagement';
 import { AppHeader } from '@/components/AppHeader';
-import { FileText, Video, Users, BookOpen, Settings, ExternalLink, ClipboardList, Database } from 'lucide-react';
+import { FileText, Video, Users, BookOpen, Settings, ExternalLink, ClipboardList, Database, ClipboardCheck } from 'lucide-react';
 
 export default function AdminPage() {
   const { isAuthenticated, isLoading, isManager } = useAuthContext();
@@ -66,6 +66,15 @@ export default function AdminPage() {
             >
               <Settings className="h-4 w-4" />
               Gerência Geral
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/correcao')}
+              className="flex items-center gap-2"
+            >
+              <ClipboardCheck className="h-4 w-4" />
+              Painel de Correção
               <ExternalLink className="h-4 w-4" />
             </Button>
           </div>

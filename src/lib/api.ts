@@ -189,8 +189,8 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role?: 'user' | 'manager'; // Para compatibilidade
-  roles?: ('user' | 'manager')[]; // Como o backend realmente retorna
+  role?: 'user' | 'manager' | 'corretor'; // Para compatibilidade
+  roles?: ('user' | 'manager' | 'corretor')[]; // Como o backend realmente retorna
   permissions?: string[];
   createdAt?: string;
   updatedAt?: string;

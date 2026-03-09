@@ -13,7 +13,8 @@ import {
   BookOpen,
   Home,
   KeyRound,
-  RefreshCw
+  RefreshCw,
+  ClipboardCheck,
 } from "lucide-react";
 import { ChangePasswordForm } from "./ChangePasswordForm";
 
@@ -35,7 +36,7 @@ export function AppHeader({
   children
 }: AppHeaderProps) {
   const router = useRouter();
-  const { user: currentUser, logout, isManager } = useAuthContext();
+  const { user: currentUser, logout, isManager, isCorretor } = useAuthContext();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const handleLogout = () => {
@@ -48,7 +49,11 @@ export function AppHeader({
   };
 
   const handleAdminAccess = () => {
-    router.push("/admin/users");
+    router.push("/admin");
+  };
+
+  const handleCorrecaoAccess = () => {
+    router.push("/correcao");
   };
 
   const handleRefresh = async () => {
@@ -58,6 +63,7 @@ export function AppHeader({
   };
 
   const isAdmin = isManager();
+  const isCorretorUser = isCorretor();
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -101,8 +107,8 @@ export function AppHeader({
           <div className="hidden md:flex items-center gap-2">
             <User className="w-4 h-4" />
             <span className="text-sm font-medium">{currentUser?.name}</span>
-            <Badge variant={isAdmin ? "default" : "secondary"} className="text-xs">
-              {isAdmin ? "Admin" : "Usuário"}
+            <Badge variant={isAdmin ? "default" : isCorretorUser ? "outline" : "secondary"} className="text-xs">
+              {isAdmin ? "Admin" : isCorretorUser ? "Corretor" : "Usuário"}
             </Badge>
           </div>
 
@@ -137,6 +143,18 @@ export function AppHeader({
             >
               <Settings className="w-4 h-4 mr-2" />
               Administração
+            </Button>
+          )}
+
+          {isCorretorUser && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCorrecaoAccess}
+              className="hidden md:flex"
+            >
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              Correção
             </Button>
           )}
 

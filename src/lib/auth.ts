@@ -4,7 +4,7 @@ export interface AuthUser {
   _id: string;
   name: string;
   email: string;
-  role: 'user' | 'manager';
+  role: 'user' | 'manager' | 'corretor';
 }
 
 interface AuthState {
@@ -94,6 +94,11 @@ export const getCurrentUser = (): AuthUser | null => {
 
 export const isAuthenticated = (): boolean => {
   return getCurrentUser() !== null;
+};
+
+export const hasCorretorRole = (): boolean => {
+  const user = getCurrentUser();
+  return user?.role === 'corretor' || user?.role === 'manager';
 };
 
 export const hasAdminRole = (): boolean => {

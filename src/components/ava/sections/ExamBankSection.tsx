@@ -1,7 +1,13 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
-import { ExamAttempt, ExamResult, ExamQuestionSnapshot, Section, avaService } from '@/lib/services/ava.service';
+import {
+  ExamAttempt,
+  ExamResult,
+  ExamQuestionSnapshot,
+  Section,
+  avaService,
+} from '@/lib/services/ava.service';
 
 interface Props {
   section: Section;
@@ -23,7 +29,7 @@ export function ExamBankSection({ section }: Props) {
   if (!bankId) {
     return (
       <div className="rounded border border-dashed border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-700">
-        Esta seção de prova não possui banco de questões configurado.
+        Esta seÃ§Ã£o de prova nÃ£o possui banco de questÃµes configurado.
       </div>
     );
   }
@@ -55,7 +61,7 @@ export function ExamBankSection({ section }: Props) {
     });
 
     if (missing.length > 0) {
-      setError(`Responda todas as ${attempt.questions.length} questões antes de enviar.`);
+      setError(`Responda todas as ${attempt.questions.length} questÃµes antes de enviar.`);
       return;
     }
 
@@ -78,47 +84,85 @@ export function ExamBankSection({ section }: Props) {
     }
   }
 
-  // ── Result view ────────────────────────────────────────────────
+  // â”€â”€ Result view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (result) {
-    return (
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-bold text-gray-900">🏁 Resultado da Prova</h3>
-        <div className="mb-6 flex items-center gap-6">
-          <div className={`text-5xl font-black ${result.passed ? 'text-green-600' : 'text-red-500'}`}>
-            {result.score.toFixed(1)}%
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">{result.totalQuestions} questões respondidas</p>
-            <p className={`mt-1 text-base font-bold ${result.passed ? 'text-green-700' : 'text-red-600'}`}>
-              {result.passed ? '✅ Aprovado' : '❌ Não aprovado'}
-            </p>
-            <p className="mt-0.5 text-xs text-gray-400">Nota mínima: 60%</p>
-          </div>
-        </div>
+    const hasOpen = result.hasOpenQuestions;
 
-        {Object.entries(result.byAxis).length > 0 && (
-          <div className="mb-4">
-            <h4 className="mb-2 text-sm font-semibold text-gray-700">Por eixo temático:</h4>
-            {Object.entries(result.byAxis).map(([axis, stats]) => (
-              <div key={axis} className="mb-3">
-                <div className="mb-1 flex justify-between text-sm">
-                  <span className="font-medium">{axis === '__geral__' ? 'Geral' : axis}</span>
-                  <span>{stats.score.toFixed(0)}%</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-gray-200">
-                  <div
-                    className={`h-2 rounded-full ${stats.score >= 60 ? 'bg-green-500' : 'bg-red-400'}`}
-                    style={{ width: `${Math.min(stats.score, 100)}%` }}
-                  />
+    return (
+      <div className="rounded-xl border bg-white p-6 shadow-sm space-y-6">
+        {!hasOpen ? (
+          // â”€â”€ Pure multiple choice: show full result â”€â”€
+          <>
+            <h3 className="text-lg font-bold text-gray-900">ðŸ Resultado da Prova</h3>
+            <div className="flex items-center gap-6">
+              <div className={`text-5xl font-black ${result.passed ? 'text-green-600' : 'text-red-500'}`}>
+                {result.score.toFixed(1)}%
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">{result.totalQuestions} questÃµes respondidas</p>
+                <p className={`mt-1 text-base font-bold ${result.passed ? 'text-green-700' : 'text-red-600'}`}>
+                  {result.passed ? 'âœ… Aprovado' : 'âŒ NÃ£o aprovado'}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-400">Nota mÃ­nima: 60%</p>
+              </div>
+            </div>
+            {Object.entries(result.byAxis).length > 0 && (
+              <div>
+                <h4 className="mb-2 text-sm font-semibold text-gray-700">Por eixo temÃ¡tico:</h4>
+                {Object.entries(result.byAxis).map(([axis, stats]) => (
+                  <div key={axis} className="mb-3">
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span className="font-medium">{axis === '__geral__' ? 'Geral' : axis}</span>
+                      <span>{stats.score.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div
+                        className={`h-2 rounded-full ${stats.score >= 60 ? 'bg-green-500' : 'bg-red-400'}`}
+                        style={{ width: `${Math.min(stats.score, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          // â”€â”€ Has open questions: show partial + pending correction notice â”€â”€
+          <>
+            <h3 className="text-lg font-bold text-gray-900">ðŸ“¬ Prova Enviada com Sucesso</h3>
+
+            {/* Partial MC result (if mixed) */}
+            {result.score > 0 && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm font-semibold text-blue-800 mb-1">
+                  Resultado parcial (questÃµes objetivas):
+                </p>
+                <div className="flex items-center gap-4">
+                  <p className="text-3xl font-black text-blue-700">{result.score.toFixed(1)}%</p>
+                  <p className="text-xs text-blue-500">Nota mÃ­nima: 60%</p>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Open questions pending notice */}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">âœï¸</span>
+                <p className="font-semibold text-amber-800">
+                  QuestÃµes dissertativas aguardando correÃ§Ã£o
+                </p>
+              </div>
+              <p className="text-sm text-amber-700">
+                Suas respostas dissertativas foram enviadas e registradas no banco de anti-plÃ¡gio.
+                Um corretor irÃ¡ analisar e fornecer feedback em breve.
+              </p>
+            </div>
+          </>
         )}
 
         <button
           onClick={() => { setResult(null); setAttempt(null); setAnswers({}); }}
-          className="mt-2 rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200"
+          className="rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200"
         >
           Nova tentativa
         </button>
@@ -126,13 +170,13 @@ export function ExamBankSection({ section }: Props) {
     );
   }
 
-  // ── Exam in progress ───────────────────────────────────────────
+  // â”€â”€ Exam in progress â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (attempt) {
     return (
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-gray-600">
-            Prova em andamento — {attempt.questions.length} questões
+            Prova em andamento â€” {attempt.questions.length} questÃµes
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
@@ -162,13 +206,14 @@ export function ExamBankSection({ section }: Props) {
     );
   }
 
-  // ── Start view ─────────────────────────────────────────────────
+  // â”€â”€ Start view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-red-300 bg-red-50 p-10">
-      <span className="mb-3 text-5xl">🎓</span>
+      <span className="mb-3 text-5xl">ðŸŽ“</span>
       <h3 className="mb-1 text-lg font-bold text-gray-900">Prova</h3>
       <p className="mb-4 max-w-sm text-center text-sm text-gray-600">
-        Esta prova contém questões aleatórias do banco. Leia com atenção antes de responder.
+        Esta prova contÃ©m questÃµes aleatÃ³rias do banco. Leia com atenÃ§Ã£o antes de responder.
+        QuestÃµes objetivas tÃªm resultado imediato. QuestÃµes dissertativas passarÃ£o por correÃ§Ã£o manual.
       </p>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
       <button
@@ -182,7 +227,7 @@ export function ExamBankSection({ section }: Props) {
   );
 }
 
-// ── Question Card ──────────────────────────────────────────────
+// â”€â”€ Question Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface ExamQuestionCardProps {
   question: ExamQuestionSnapshot;
@@ -192,27 +237,33 @@ interface ExamQuestionCardProps {
 }
 
 function ExamQuestionCard({ question, index, answer, onAnswer }: ExamQuestionCardProps) {
-  const typeLabel =
-    question.questionType === 'open'
-      ? 'Questão Aberta'
-      : question.questionType === 'weighted'
-        ? 'Múltipla Escolha Ponderada'
-        : 'Múltipla Escolha';
+  const isOpen = question.questionType === 'open';
+
+  const typeLabel = isOpen
+    ? 'QuestÃ£o Dissertativa'
+    : question.questionType === 'weighted'
+      ? 'MÃºltipla Escolha Ponderada'
+      : 'MÃºltipla Escolha';
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-      <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
-        {typeLabel}
-      </p>
+    <div className={`rounded-xl border p-5 shadow-sm ${isOpen ? 'border-amber-200 bg-amber-50/50' : 'border-gray-100 bg-white'}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{typeLabel}</p>
+        {isOpen && (
+          <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-medium">
+            CorreÃ§Ã£o manual
+          </span>
+        )}
+      </div>
       <p className="mb-3 font-medium text-gray-800">
         {index + 1}. {question.statement}
       </p>
 
-      {question.questionType === 'open' && (
+      {isOpen && (
         <textarea
-          rows={4}
-          className="w-full rounded-md border border-gray-300 p-3 text-sm focus:border-blue-500 focus:outline-none"
-          placeholder="Digite sua resposta aqui..."
+          rows={5}
+          className="w-full rounded-md border border-gray-300 p-3 text-sm focus:border-amber-500 focus:outline-none"
+          placeholder="Digite sua resposta dissertativa aqui..."
           value={(answer as { type: 'open'; text: string } | undefined)?.text ?? ''}
           onChange={(e) => onAnswer({ type: 'open', text: e.target.value })}
         />
@@ -226,9 +277,8 @@ function ExamQuestionCard({ question, index, answer, onAnswer }: ExamQuestionCar
             return (
               <label
                 key={opt.index}
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition ${
-                  selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
-                }`}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                  }`}
               >
                 <input
                   type="radio"

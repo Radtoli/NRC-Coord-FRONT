@@ -140,12 +140,45 @@ export interface ExamAttempt {
   startedAt: string;
 }
 
+export interface PlagiarismResult {
+  questionId: string;
+  /** true = sem plágio detectado */
+  passed: boolean;
+  similarAttemptIds: string[];
+}
+
+export interface CorrectorFeedback {
+  questionId: string;
+  feedback: string;
+}
+
+export interface AttemptForCorrection {
+  _id: string;
+  moduleId: string;
+  bankId: string;
+  questions: ExamQuestionSnapshot[];
+  answers: { questionId: string; answer: string; scoreObtained: number }[];
+  score: number;
+  passed: boolean;
+  completed: boolean;
+  startedAt: string;
+  completedAt?: string;
+  plagiarismResults?: PlagiarismResult[];
+  correctorFeedbacks?: CorrectorFeedback[];
+  generalFeedback?: string;
+  correctedAt?: string;
+  correctorId?: string;
+}
+
 export interface ExamResult {
   attemptId: string;
   score: number;
   passed: boolean;
   totalQuestions: number;
   byAxis: Record<string, { score: number; total: number }>;
+  hasOpenQuestions: boolean;
+  plagiarismResults?: PlagiarismResult[];
+  answers: { questionId: string; answer: string; scoreObtained: number }[];
 }
 
 export interface CourseDashboard {
@@ -335,6 +368,25 @@ export const avaService = {
     api.get<{ success: boolean; data: ExamAttempt[] }>(
       moduleId ? `/ava/exam/my-attempts?moduleId=${moduleId}` : '/ava/exam/my-attempts'
     ).then(unwrap),
+
+  // ── Corrections (corretor / admin) ────────────────────────────────
+  listCorrections: (all = false) =>
+    api.get<{ success: boolean; data: AttemptForCorrection[] }>(
+      all ? '/ava/exam/corrections?all=true' : '/ava/exam/corrections'
+    ).then(unwrap),
+
+  getAttemptForCorrection: (id: string) =>
+    api.get<{ success: boolean; data: AttemptForCorrection }>(`/ava/exam/corrections/${id}`).then(unwrap),
+
+  submitCorrection: (
+    id: string,
+    feedbacks: CorrectorFeedback[],
+    generalFeedback?: string,
+  ) =>
+    api.post<{ success: boolean; data: AttemptForCorrection }>(`/ava/exam/corrections/${id}/submit`, {
+      feedbacks,
+      generalFeedback,
+    }).then(unwrap),
 
   // ── Progress ─────────────────────────────────────────────────────
   recordPageProgress: (pageId: string, timeSpentSeconds: number, completed?: boolean) =>
