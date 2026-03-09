@@ -29,7 +29,7 @@ interface User {
   name: string;
   email: string;
   demolayId: number;
-  roles: ('user' | 'manager')[];
+  roles: ('user' | 'manager' | 'corretor')[];
   permissions?: string[];
   createdAt: string;
   updatedAt: string;
@@ -40,7 +40,7 @@ interface CreateUserData {
   email: string;
   password: string;
   demolayId: number;
-  roles: ('user' | 'manager')[];
+  roles: ('user' | 'manager' | 'corretor')[];
 }
 
 interface UpdateUserData {
