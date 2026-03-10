@@ -140,7 +140,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Ações Rápidas — apenas para admins */}
-          {currentUser?.role === 'admin' && (
+          {currentUser?.role === 'manager' && (
             <div className="bg-muted/50 rounded-lg p-6">
               <h3 className="text-xl font-semibold mb-4 text-center">Ferramentas</h3>
               <div className="flex justify-center">
