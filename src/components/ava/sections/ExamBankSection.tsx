@@ -52,7 +52,7 @@ export function ExamBankSection({ section, moduleId }: Props) {
   if (!bankId) {
     return (
       <div className="rounded border border-dashed border-yellow-400 bg-yellow-50 p-4 text-sm text-yellow-700">
-        Esta seÃ§Ã£o de prova nÃ£o possui banco de questÃµes configurado.
+        Esta seção de prova não possui banco de questões configurado.
       </div>
     );
   }
@@ -88,7 +88,7 @@ export function ExamBankSection({ section, moduleId }: Props) {
     });
 
     if (missing.length > 0) {
-      setError(`Responda todas as ${attempt.questions.length} questÃµes antes de enviar.`);
+      setError(`Responda todas as ${attempt.questions.length} questões antes de enviar.`);
       return;
     }
 
@@ -120,22 +120,22 @@ export function ExamBankSection({ section, moduleId }: Props) {
         {!hasOpen ? (
           // â”€â”€ Pure multiple choice: show full result â”€â”€
           <>
-            <h3 className="text-lg font-bold text-gray-900">ðŸ Resultado da Prova</h3>
+            <h3 className="text-lg font-bold text-gray-900">🎯 Resultado da Prova</h3>
             <div className="flex items-center gap-6">
               <div className={`text-5xl font-black ${result.passed ? 'text-green-600' : 'text-red-500'}`}>
                 {result.score.toFixed(1)}%
               </div>
               <div>
-                <p className="text-sm text-gray-500">{result.totalQuestions} questÃµes respondidas</p>
+                <p className="text-sm text-gray-500">{result.totalQuestions} questões respondidas</p>
                 <p className={`mt-1 text-base font-bold ${result.passed ? 'text-green-700' : 'text-red-600'}`}>
-                  {result.passed ? 'âœ… Aprovado' : 'âŒ NÃ£o aprovado'}
+                  {result.passed ? '✅ Aprovado' : '❌ Não aprovado'}
                 </p>
-                <p className="mt-0.5 text-xs text-gray-400">Nota mÃ­nima: 60%</p>
+                <p className="mt-0.5 text-xs text-gray-400">Nota mínima: 60%</p>
               </div>
             </div>
             {Object.entries(result.byAxis).length > 0 && (
               <div>
-                <h4 className="mb-2 text-sm font-semibold text-gray-700">Por eixo temÃ¡tico:</h4>
+                <h4 className="mb-2 text-sm font-semibold text-gray-700">Por eixo temático:</h4>
                 {Object.entries(result.byAxis).map(([axis, stats]) => (
                   <div key={axis} className="mb-3">
                     <div className="mb-1 flex justify-between text-sm">
@@ -156,17 +156,17 @@ export function ExamBankSection({ section, moduleId }: Props) {
         ) : (
           // â”€â”€ Has open questions: show partial + pending correction notice â”€â”€
           <>
-            <h3 className="text-lg font-bold text-gray-900">ðŸ“¬ Prova Enviada com Sucesso</h3>
+            <h3 className="text-lg font-bold text-gray-900">🔬 Prova Enviada com Sucesso</h3>
 
             {/* Partial MC result (if mixed) */}
             {result.score > 0 && (
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <p className="text-sm font-semibold text-blue-800 mb-1">
-                  Resultado parcial (questÃµes objetivas):
+                  Resultado parcial (questões objetivas):
                 </p>
                 <div className="flex items-center gap-4">
                   <p className="text-3xl font-black text-blue-700">{result.score.toFixed(1)}%</p>
-                  <p className="text-xs text-blue-500">Nota mÃ­nima: 60%</p>
+                  <p className="text-xs text-blue-500">Nota mínima: 60%</p>
                 </div>
               </div>
             )}
@@ -174,14 +174,14 @@ export function ExamBankSection({ section, moduleId }: Props) {
             {/* Open questions pending notice */}
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">âœï¸</span>
+                <span className="text-xl">✏️</span>
                 <p className="font-semibold text-amber-800">
-                  QuestÃµes dissertativas aguardando correÃ§Ã£o
+                  Questões dissertativas aguardando correção
                 </p>
               </div>
               <p className="text-sm text-amber-700">
-                Suas respostas dissertativas foram enviadas e registradas no banco de anti-plÃ¡gio.
-                Um corretor irÃ¡ analisar e fornecer feedback em breve.
+                Suas respostas dissertativas foram enviadas e registradas no banco de anti-plágio.
+                Um corretor irá analisar e fornecer feedback em breve.
               </p>
             </div>
           </>
@@ -203,7 +203,7 @@ export function ExamBankSection({ section, moduleId }: Props) {
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-gray-600">
-            Prova em andamento â€” {attempt.questions.length} questÃµes
+            Prova em andamento — {attempt.questions.length} questões
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
@@ -236,11 +236,11 @@ export function ExamBankSection({ section, moduleId }: Props) {
   // â”€â”€ Start view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-red-300 bg-red-50 p-10">
-      <span className="mb-3 text-5xl">ðŸŽ“</span>
+      <span className="mb-3 text-5xl">🎓</span>
       <h3 className="mb-1 text-lg font-bold text-gray-900">Prova</h3>
       <p className="mb-4 max-w-sm text-center text-sm text-gray-600">
-        Esta prova contÃ©m questÃµes aleatÃ³rias do banco. Leia com atenÃ§Ã£o antes de responder.
-        QuestÃµes objetivas tÃªm resultado imediato. QuestÃµes dissertativas passarÃ£o por correÃ§Ã£o manual.
+        Esta prova contém questões aleatórias do banco. Leia com atenção antes de responder.
+        Questões objetivas têm resultado imediato. Questões dissertativas passarão por correção manual.
       </p>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
       <button
@@ -267,10 +267,10 @@ function ExamQuestionCard({ question, index, answer, onAnswer }: ExamQuestionCar
   const isOpen = question.questionType === 'open';
 
   const typeLabel = isOpen
-    ? 'QuestÃ£o Dissertativa'
+    ? 'Questão Dissertativa'
     : question.questionType === 'weighted'
-      ? 'MÃºltipla Escolha Ponderada'
-      : 'MÃºltipla Escolha';
+      ? 'Múltipla Escolha Ponderada'
+      : 'Múltipla Escolha';
 
   return (
     <div className={`rounded-xl border p-5 shadow-sm ${isOpen ? 'border-amber-200 bg-amber-50/50' : 'border-gray-100 bg-white'}`}>
@@ -278,7 +278,7 @@ function ExamQuestionCard({ question, index, answer, onAnswer }: ExamQuestionCar
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{typeLabel}</p>
         {isOpen && (
           <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-medium">
-            CorreÃ§Ã£o manual
+            Correção manual
           </span>
         )}
       </div>
