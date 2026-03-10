@@ -230,7 +230,9 @@ function BankQuestionsPanel({ bankId }: { bankId: string }) {
                     {q.options.map((opt, oi) => (
                       <li key={oi} className={`text-xs pl-2 ${opt.isCorrect ? 'text-green-700 font-medium' : 'text-gray-500'}`}>
                         {opt.isCorrect ? '✓' : '○'} {opt.text}
-                        {opt.scoreWeight !== 1 && opt.scoreWeight !== 0 && ` (peso ${opt.scoreWeight})`}
+                        {q.questionType === 'weighted'
+                          ? ` (peso ${opt.scoreWeight})`
+                          : null}
                       </li>
                     ))}
                   </ul>
@@ -271,8 +273,8 @@ function AddExamQuestionForm({
   const [qType, setQType] = useState<QType>('multiple_choice');
   const [axis, setAxis] = useState('');
   const [options, setOptions] = useState<OptionDraft[]>([
-    { text: '', isCorrect: false, scoreWeight: 1 },
-    { text: '', isCorrect: false, scoreWeight: 1 },
+    { text: '', isCorrect: false, scoreWeight: 0 },
+    { text: '', isCorrect: false, scoreWeight: 0 },
   ]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -344,7 +346,7 @@ function AddExamQuestionForm({
       {qType !== 'open' && (
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">
-            Alternativas {qType === 'weighted' ? '(defina o peso de cada correta)' : '(marque a(s) correta(s))'}
+            Alternativas {qType === 'weighted' ? '(peso decimal por opção: 0.0 = errado · 1.0 = correto total; ex: 0.6)' : '(marque a(s) correta(s))'}
           </label>
           <div className="space-y-2">
             {options.map((opt, i) => (
@@ -363,11 +365,15 @@ function AddExamQuestionForm({
                 />
                 {qType === 'weighted' && (
                   <input
-                    type="number" min={0} max={1} step={0.1}
-                    className="w-20 rounded border p-1.5 text-sm"
-                    title="Peso (0-1)"
+                    type="number" min={0} max={1} step={0.01}
+                    className="w-24 rounded border p-1.5 text-sm"
+                    title="Peso decimal (0.0 – 1.0)"
+                    placeholder="0.60"
                     value={opt.scoreWeight}
-                    onChange={(e) => setOption(i, { scoreWeight: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setOption(i, { scoreWeight: isNaN(val) ? 0 : Math.min(1, Math.max(0, val)) });
+                    }}
                   />
                 )}
                 {options.length > 2 && (
@@ -383,7 +389,7 @@ function AddExamQuestionForm({
             ))}
             <button
               type="button"
-              onClick={() => setOptions((prev) => [...prev, { text: '', isCorrect: false, scoreWeight: 1 }])}
+              onClick={() => setOptions((prev) => [...prev, { text: '', isCorrect: false, scoreWeight: 0 }])}
               className="text-xs text-blue-600 hover:underline"
             >
               + Alternativa
