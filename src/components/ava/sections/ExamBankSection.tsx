@@ -123,7 +123,7 @@ export function ExamBankSection({ section, moduleId }: Props) {
             <h3 className="text-lg font-bold text-gray-900">🎯 Resultado da Prova</h3>
             <div className="flex items-center gap-6">
               <div className={`text-5xl font-black ${result.passed ? 'text-green-600' : 'text-red-500'}`}>
-                {result.score.toFixed(1)}%
+                {(result.score * 100).toFixed(1)}%
               </div>
               <div>
                 <p className="text-sm text-gray-500">{result.totalQuestions} questões respondidas</p>
@@ -140,12 +140,12 @@ export function ExamBankSection({ section, moduleId }: Props) {
                   <div key={axis} className="mb-3">
                     <div className="mb-1 flex justify-between text-sm">
                       <span className="font-medium">{axis === '__geral__' ? 'Geral' : axis}</span>
-                      <span>{stats.score.toFixed(0)}%</span>
+                      <span>{(stats.score * 100).toFixed(0)}%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-gray-200">
                       <div
-                        className={`h-2 rounded-full ${stats.score >= 60 ? 'bg-green-500' : 'bg-red-400'}`}
-                        style={{ width: `${Math.min(stats.score, 100)}%` }}
+                        className={`h-2 rounded-full ${stats.score * 100 >= 60 ? 'bg-green-500' : 'bg-red-400'}`}
+                        style={{ width: `${Math.min(stats.score * 100, 100)}%` }}
                       />
                     </div>
                   </div>

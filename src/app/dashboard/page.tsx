@@ -139,20 +139,22 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Ações Rápidas */}
-          <div className="bg-muted/50 rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 text-center">Ferramentas</h3>
-            <div className="flex justify-center">
-              <Button
-                onClick={() => router.push('/plagio')}
-                className="flex items-center gap-2"
-                size="lg"
-              >
-                <Search className="w-5 h-5" />
-                Detector de Plágio
-              </Button>
+          {/* Ações Rápidas — apenas para admins */}
+          {currentUser?.role === 'admin' && (
+            <div className="bg-muted/50 rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-4 text-center">Ferramentas</h3>
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => router.push('/plagio')}
+                  className="flex items-center gap-2"
+                  size="lg"
+                >
+                  <Search className="w-5 h-5" />
+                  Detector de Plágio
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Trilhas Section */}
           {trilhas.length === 0 ? (
