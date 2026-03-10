@@ -61,9 +61,11 @@ export function ExamBankSection({ section, moduleId }: Props) {
     try {
       setLoading(true);
       setError(null);
-      // moduleId comes from the page context (URL query); fallback to section.id for legacy compatibility
-      const targetModuleId = moduleId ?? section.id;
-      const newAttempt = await avaService.startExam(targetModuleId, bankId);
+      if (!moduleId) {
+        setError('ID do módulo não disponível. Acesse esta página pelo curso.');
+        return;
+      }
+      const newAttempt = await avaService.startExam(moduleId);
       setAttempt(shuffleAttempt(newAttempt));
       setAnswers({});
       setResult(null);
