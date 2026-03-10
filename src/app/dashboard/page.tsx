@@ -40,7 +40,7 @@ export default function DashboardPage() {
           avaService.listCourses().catch(() => [] as Course[]),
         ]);
         setTrilhas(trilhasData);
-        setCourses(coursesData.filter((c) => c.status === 'published'));
+        setCourses(coursesData);
       } catch {
         setError('Erro ao carregar dados. Tente novamente.');
       } finally {
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         avaService.listCourses().catch(() => [] as Course[]),
       ]);
       setTrilhas(trilhasData);
-      setCourses(coursesData.filter((c) => c.status === 'published'));
+      setCourses(coursesData);
     } catch {
       setError('Erro ao carregar dados. Tente novamente.');
     } finally {
