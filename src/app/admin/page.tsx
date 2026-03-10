@@ -11,8 +11,9 @@ import { TrilhaManagement } from '@/components/admin/TrilhaManagement';
 import { VideoManagement } from '@/components/admin/VideoManagement';
 import { QuizManagement } from '@/components/admin/QuizManagement';
 import { ExamBankManagement } from '@/components/admin/ExamBankManagement';
+import { CourseManagement } from '@/components/admin/CourseManagement';
 import { AppHeader } from '@/components/AppHeader';
-import { FileText, Video, Users, BookOpen, Settings, ExternalLink, ClipboardList, Database, ClipboardCheck } from 'lucide-react';
+import { FileText, Video, Users, BookOpen, Settings, ExternalLink, ClipboardList, Database, ClipboardCheck, GraduationCap } from 'lucide-react';
 
 export default function AdminPage() {
   const { isAuthenticated, isLoading, isManager } = useAuthContext();
@@ -81,7 +82,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Usuários
@@ -93,6 +94,10 @@ export default function AdminPage() {
             <TabsTrigger value="trilhas" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Trilhas
+            </TabsTrigger>
+            <TabsTrigger value="cursos" className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              Cursos
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -160,6 +165,20 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <TrilhaManagement />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cursos" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gerenciamento de Cursos</CardTitle>
+                <CardDescription>
+                  Vincule cursos às trilhas para que apareçam na tela principal dos alunos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CourseManagement />
               </CardContent>
             </Card>
           </TabsContent>
