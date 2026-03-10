@@ -19,8 +19,6 @@ const SECTION_LABELS: Record<SectionType, string> = {
   EXAM_BANK: 'Prova',
 };
 
-const DEFAULT_SECTION_TITLE: Record<SectionType, string> = { ...SECTION_LABELS };
-
 // ─── Content editor per section type ────────────────────────────
 
 function ContentEditor({

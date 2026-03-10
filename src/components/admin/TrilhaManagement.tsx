@@ -233,7 +233,7 @@ export function TrilhaManagement() {
                     placeholder="Cole o ID do curso para linkar a trilha"
                     disabled={isSubmitting}
                   />
-                  <p className="text-xs text-muted-foreground">Quando preenchido, um botão "Acessar Curso" aparecerá para o aluno no painel.</p>
+                  <p className="text-xs text-muted-foreground">Quando preenchido, um botão &quot;Acessar Curso&quot; aparecerá para o aluno no painel.</p>
                 </div>
               </div>
 

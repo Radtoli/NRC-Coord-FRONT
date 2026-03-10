@@ -194,7 +194,7 @@ function CreateQuizForm({ onCreated, onCancel }: { onCreated: (q: Quiz) => void;
 
 // ── QuizQuestionsPanel ─────────────────────────────────────────────
 
-function QuizQuestionsPanel({ quiz, onRefresh }: { quiz: Quiz; onRefresh: () => void }) {
+function QuizQuestionsPanel({ quiz, onRefresh: _onRefresh }: { quiz: Quiz; onRefresh: () => void }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>(quiz.questions ?? []);
   const [showAdd, setShowAdd] = useState(false);
 

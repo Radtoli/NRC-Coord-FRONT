@@ -167,18 +167,19 @@ function BankQuestionsPanel({ bankId }: { bankId: string }) {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
 
-  async function load() {
-    try {
-      const data = await avaService.listBankQuestions(bankId);
-      setQuestions(data);
-    } catch {
-      // silently fail
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await avaService.listBankQuestions(bankId);
+        setQuestions(data);
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-
-  useEffect(() => { load(); }, [bankId]);
+    load();
+  }, [bankId]);
 
   async function handleDelete(id: string) {
     if (!confirm('Remover esta questão?')) return;
