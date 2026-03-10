@@ -73,9 +73,12 @@ class ApiClient {
       }
     }
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
+
+    // Só define Content-Type para requisições com body
+    if (options.body) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     // Adicionar headers extras se fornecidos
     if (options.headers) {
