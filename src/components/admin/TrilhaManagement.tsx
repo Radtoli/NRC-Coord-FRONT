@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { trilhaService, videoService } from "@/lib/services";
 import { Trilha as ApiTrilha, Video as ApiVideo } from "@/lib/services";
 import { avaService, Course } from "@/lib/services/ava.service";
+import { clearTrilhasCache } from "@/config/trilhas";
 import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate, Eye } from "lucide-react";
 
 interface TrilhaFormData {
@@ -84,10 +85,11 @@ export function TrilhaManagement() {
         const response = await trilhaService.updateTrilha(editingTrilha._id, {
           title: formData.title,
           description: formData.description,
-          courseId: formData.courseId || undefined
+          courseId: formData.courseId || null
         });
 
         if (response.success) {
+          clearTrilhasCache();
           await loadData();
           handleCloseDialog();
         } else {
@@ -102,6 +104,7 @@ export function TrilhaManagement() {
         });
 
         if (response.success) {
+          clearTrilhasCache();
           await loadData();
           handleCloseDialog();
         } else {

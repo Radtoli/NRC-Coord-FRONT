@@ -285,7 +285,7 @@ export interface UpdateTrilhaRequest {
   title?: string;
   description?: string;
   videos?: string[];
-  courseId?: string;
+  courseId?: string | null;
 }
 
 export interface CreateDocumentRequest {

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { avaService, Course } from "@/lib/services/ava.service";
 import { trilhaService } from "@/lib/services";
 import { Trilha as ApiTrilha } from "@/lib/services";
+import { clearTrilhasCache } from "@/config/trilhas";
 import { RefreshCw, AlertCircle, Link2, Link2Off, GraduationCap } from "lucide-react";
 
 export function CourseManagement() {
@@ -67,7 +68,7 @@ export function CourseManagement() {
 
       // Desvincula da trilha anterior (se for diferente)
       if (currentTrilha && currentTrilha._id !== newTrilhaId) {
-        await trilhaService.updateTrilha(currentTrilha._id, { courseId: undefined });
+        await trilhaService.updateTrilha(currentTrilha._id, { courseId: null });
       }
 
       // Vincula à nova trilha
@@ -75,6 +76,7 @@ export function CourseManagement() {
         await trilhaService.updateTrilha(newTrilhaId, { courseId: selectedCourse.id });
       }
 
+      clearTrilhasCache(); // força dashboard a buscar dados frescos
       await loadData();
       setDialogOpen(false);
       setSelectedCourse(null);
