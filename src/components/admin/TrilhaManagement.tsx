@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { trilhaService, videoService } from "@/lib/services";
 import { Trilha as ApiTrilha, Video as ApiVideo } from "@/lib/services";
 import { avaService, Course } from "@/lib/services/ava.service";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate, Eye } from "lucide-react";
 
 interface TrilhaFormData {
@@ -232,22 +231,20 @@ export function TrilhaManagement() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="courseId">Curso AVA vinculado <span className="text-xs text-muted-foreground font-normal">(opcional)</span></Label>
-                  <Select
+                  <select
+                    id="courseId"
                     value={formData.courseId || "__none__"}
-                    onValueChange={(val) => setFormData({ ...formData, courseId: val === "__none__" ? "" : val })}
+                    onChange={(e) => setFormData({ ...formData, courseId: e.target.value === "__none__" ? "" : e.target.value })}
+                    disabled={isSubmitting}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <SelectTrigger id="courseId" disabled={isSubmitting}>
-                      <SelectValue placeholder="Selecione um curso..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">Nenhum</SelectItem>
-                      {courses.map((course) => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}{course.status !== 'published' ? ` (${course.status})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="__none__">Nenhum</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.title}{course.status !== 'published' ? ` (${course.status})` : ''}
+                      </option>
+                    ))}
+                  </select>
                   <p className="text-xs text-muted-foreground">Quando selecionado, um botão &quot;Acessar Curso&quot; aparecerá para o aluno no painel.</p>
                 </div>
               </div>

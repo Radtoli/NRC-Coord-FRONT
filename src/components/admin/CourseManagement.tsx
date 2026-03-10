@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { avaService, Course } from "@/lib/services/ava.service";
 import { trilhaService } from "@/lib/services";
 import { Trilha as ApiTrilha } from "@/lib/services";
@@ -214,26 +213,24 @@ export function CourseManagement() {
             )}
 
             <div className="grid gap-2">
-              <Label>Trilha</Label>
-              <Select
+              <Label htmlFor="trilha-select">Trilha</Label>
+              <select
+                id="trilha-select"
                 value={selectedTrilhaId}
-                onValueChange={setSelectedTrilhaId}
+                onChange={(e) => setSelectedTrilhaId(e.target.value)}
+                disabled={isSubmitting}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <SelectTrigger disabled={isSubmitting}>
-                  <SelectValue placeholder="Selecione uma trilha..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Nenhuma</SelectItem>
-                  {trilhas.map((t) => (
-                    <SelectItem key={t._id} value={t._id}>
-                      {t.title}
-                      {t.courseId && t.courseId !== selectedCourse?.id
-                        ? " (já possui curso)"
-                        : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="__none__">Nenhuma</option>
+                {trilhas.map((t) => (
+                  <option key={t._id} value={t._id}>
+                    {t.title}
+                    {t.courseId && t.courseId !== selectedCourse?.id
+                      ? " (já possui curso)"
+                      : ""}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
