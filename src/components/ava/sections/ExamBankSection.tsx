@@ -11,13 +11,36 @@ import {
 
 interface Props {
   section: Section;
+  moduleId?: string;
 }
 
 type ExamAnswer =
   | { type: 'option'; index: string }
   | { type: 'open'; text: string };
 
-export function ExamBankSection({ section }: Props) {
+// ── Shuffle helpers ───────────────────────────────────────────────
+
+function shuffle<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function shuffleAttempt(attempt: ExamAttempt): ExamAttempt {
+  const shuffledQuestions = shuffle(attempt.questions).map((q) => ({
+    ...q,
+    // Only shuffle options for objective questions; open questions have no options
+    options: q.options.length > 0 ? shuffle(q.options) : q.options,
+  }));
+  return { ...attempt, questions: shuffledQuestions };
+}
+
+// ─────────────────────────────────────────────────────────────────
+
+export function ExamBankSection({ section, moduleId }: Props) {
   const bankId = (section.config?.exam_bank_id as string) ?? '';
 
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null);
@@ -38,8 +61,10 @@ export function ExamBankSection({ section }: Props) {
     try {
       setLoading(true);
       setError(null);
-      const newAttempt = await avaService.startExam(section.id, bankId);
-      setAttempt(newAttempt);
+      // moduleId comes from the page context (URL query); fallback to section.id for legacy compatibility
+      const targetModuleId = moduleId ?? section.id;
+      const newAttempt = await avaService.startExam(targetModuleId, bankId);
+      setAttempt(shuffleAttempt(newAttempt));
       setAnswers({});
       setResult(null);
     } catch (e: unknown) {

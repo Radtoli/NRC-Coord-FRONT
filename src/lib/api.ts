@@ -216,6 +216,7 @@ export interface Trilha {
   title: string;
   description: string;
   videos: string[];
+  courseId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -277,12 +278,14 @@ export interface CreateTrilhaRequest {
   title: string;
   description: string;
   videos?: string[];
+  courseId?: string;
 }
 
 export interface UpdateTrilhaRequest {
   title?: string;
   description?: string;
   videos?: string[];
+  courseId?: string;
 }
 
 export interface CreateDocumentRequest {

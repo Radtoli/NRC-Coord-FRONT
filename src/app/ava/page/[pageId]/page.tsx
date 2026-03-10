@@ -110,7 +110,7 @@ function StudentPageViewInner({ pageId }: { pageId: string }) {
             {section.title && (
               <h2 className="mb-2 text-base font-semibold text-gray-900">{section.title}</h2>
             )}
-            <SectionRenderer section={section} />
+            <SectionRenderer section={section} moduleId={moduleId ?? undefined} />
           </div>
         ))}
       </div>

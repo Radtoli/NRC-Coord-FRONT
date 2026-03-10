@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate, E
 interface TrilhaFormData {
   title: string;
   description: string;
+  courseId: string;
 }
 
 export function TrilhaManagement() {
@@ -27,7 +28,8 @@ export function TrilhaManagement() {
   const [editingTrilha, setEditingTrilha] = useState<ApiTrilha | null>(null);
   const [formData, setFormData] = useState<TrilhaFormData>({
     title: "",
-    description: ""
+    description: "",
+    courseId: ""
   });
 
   useEffect(() => {
@@ -76,7 +78,8 @@ export function TrilhaManagement() {
         // Atualizar trilha existente
         const response = await trilhaService.updateTrilha(editingTrilha._id, {
           title: formData.title,
-          description: formData.description
+          description: formData.description,
+          courseId: formData.courseId || undefined
         });
 
         if (response.success) {
@@ -89,7 +92,8 @@ export function TrilhaManagement() {
         // Criar nova trilha
         const response = await trilhaService.createTrilha({
           title: formData.title,
-          description: formData.description
+          description: formData.description,
+          courseId: formData.courseId || undefined
         });
 
         if (response.success) {
@@ -111,7 +115,8 @@ export function TrilhaManagement() {
     setEditingTrilha(trilha);
     setFormData({
       title: trilha.title,
-      description: trilha.description
+      description: trilha.description,
+      courseId: trilha.courseId ?? ''
     });
     setIsDialogOpen(true);
     setError("");
@@ -140,7 +145,7 @@ export function TrilhaManagement() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingTrilha(null);
-    setFormData({ title: "", description: "" });
+    setFormData({ title: "", description: "", courseId: "" });
     setError("");
   };
 
@@ -170,7 +175,7 @@ export function TrilhaManagement() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingTrilha(null); setFormData({ title: "", description: "" }); setError(""); }}>
+            <Button onClick={() => { setEditingTrilha(null); setFormData({ title: "", description: "", courseId: "" }); setError(""); }}>
               <Plus className="w-4 h-4 mr-2" />
               Nova Trilha
             </Button>
@@ -217,6 +222,18 @@ export function TrilhaManagement() {
                     placeholder="Descreva o conteúdo da trilha"
                     disabled={isSubmitting}
                   />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="courseId">ID do Curso AVA <span className="text-xs text-muted-foreground font-normal">(opcional)</span></Label>
+                  <Input
+                    id="courseId"
+                    value={formData.courseId}
+                    onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                    placeholder="Cole o ID do curso para linkar a trilha"
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground">Quando preenchido, um botão "Acessar Curso" aparecerá para o aluno no painel.</p>
                 </div>
               </div>
 
@@ -291,6 +308,9 @@ export function TrilhaManagement() {
                     <div>
                       <div className="font-medium">{trilha.title}</div>
                       <div className="text-xs text-muted-foreground">ID: {trilha._id}</div>
+                      {trilha.courseId && (
+                        <div className="text-xs text-primary mt-0.5">Curso: {trilha.courseId}</div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>

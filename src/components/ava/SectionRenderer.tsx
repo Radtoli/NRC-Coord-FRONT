@@ -13,9 +13,10 @@ import { ExamBankSection } from './sections/ExamBankSection';
 
 interface Props {
   section: Section;
+  moduleId?: string;
 }
 
-export function SectionRenderer({ section }: Props) {
+export function SectionRenderer({ section, moduleId }: Props) {
   switch (section.type) {
     case 'TEXT':
     case 'STORYTELLING':
@@ -36,7 +37,7 @@ export function SectionRenderer({ section }: Props) {
     case 'DASHBOARD':
       return <DashboardSection section={section} />;
     case 'EXAM_BANK':
-      return <ExamBankSection section={section} />;
+      return <ExamBankSection section={section} moduleId={moduleId} />;
     default:
       return (
         <div className="rounded border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-400">

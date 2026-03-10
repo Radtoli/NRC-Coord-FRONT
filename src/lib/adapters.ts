@@ -23,6 +23,7 @@ export interface Trilha {
   title: string;
   description: string;
   videos: Video[];
+  courseId?: string;
 }
 
 // Funções para converter dados da API para o formato esperado pelo frontend
@@ -52,7 +53,8 @@ export const convertApiTrilhaToTrilha = (apiTrilha: ApiTrilha, videos: Video[] =
     id: apiTrilha._id,
     title: apiTrilha.title,
     description: apiTrilha.description,
-    videos: videos
+    videos: videos,
+    courseId: apiTrilha.courseId
   };
 };
 

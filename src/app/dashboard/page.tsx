@@ -1,20 +1,25 @@
+
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { VideoCard } from "@/components/VideoCard";
 import { AppHeader } from "@/components/AppHeader";
 import { Trilha, getTrilhas } from "@/config/trilhas";
 import { useAuthContext } from "@/lib/context";
-import { Play, BookOpen, AlertCircle, RefreshCw, Search } from "lucide-react";
+import { Play, BookOpen, AlertCircle, RefreshCw, Search, GraduationCap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { avaService, Course } from "@/lib/services/ava.service";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user: currentUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isLoadingTrilhas, setIsLoadingTrilhas] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,12 +33,16 @@ export default function DashboardPage() {
       return;
     }
 
-    const loadTrilhas = async () => {
+    const loadData = async () => {
       try {
         setIsLoadingTrilhas(true);
         setError(null);
-        const trilhasData = await getTrilhas();
+        const [trilhasData, coursesData] = await Promise.all([
+          getTrilhas(),
+          avaService.listCourses().catch(() => [] as Course[]),
+        ]);
         setTrilhas(trilhasData);
+        setCourses(coursesData.filter((c) => c.status === 'published'));
       } catch {
         setError('Erro ao carregar dados. Tente novamente.');
       } finally {
@@ -41,15 +50,19 @@ export default function DashboardPage() {
       }
     };
 
-    loadTrilhas();
+    loadData();
   }, [router, isAuthenticated, currentUser, authLoading]);
 
   const handleRefreshTrilhas = async () => {
     try {
       setIsLoadingTrilhas(true);
       setError(null);
-      const trilhasData = await getTrilhas();
+      const [trilhasData, coursesData] = await Promise.all([
+        getTrilhas(),
+        avaService.listCourses().catch(() => [] as Course[]),
+      ]);
       setTrilhas(trilhasData);
+      setCourses(coursesData.filter((c) => c.status === 'published'));
     } catch {
       setError('Erro ao carregar dados. Tente novamente.');
     } finally {
@@ -143,7 +156,38 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Trilhas Section */}
+          {/* Cursos AVA */}
+          {courses.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-6 h-6 text-primary" />
+                <h3 className="text-2xl font-bold">Cursos</h3>
+                <Badge variant="secondary">{courses.length} disponível{courses.length !== 1 ? 'is' : ''}</Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {courses.map((course) => (
+                  <Link
+                    key={course.id}
+                    href={`/ava/course/${course.id}`}
+                    className="group flex flex-col gap-2 rounded-xl border bg-white p-5 shadow-sm transition hover:border-primary hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <p className="font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                        {course.title}
+                      </p>
+                      <ArrowRight className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-primary transition-colors mt-0.5" />
+                    </div>
+                    {course.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                    )}
+                    <span className="mt-auto text-xs font-medium text-primary">Acessar curso →</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Trilhas Section */}}
           {trilhas.length === 0 ? (
             <div className="text-center py-12">
               <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -157,11 +201,22 @@ export default function DashboardPage() {
               {trilhas.map((trilha) => (
                 <div key={trilha.id} className="space-y-6">
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="text-2xl font-bold">{trilha.title}</h3>
-                      <Badge variant="secondary">
-                        {trilha.videos.length} vídeo{trilha.videos.length !== 1 ? 's' : ''}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">
+                          {trilha.videos.length} vídeo{trilha.videos.length !== 1 ? 's' : ''}
+                        </Badge>
+                        {trilha.courseId && (
+                          <Link
+                            href={`/ava/course/${trilha.courseId}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition"
+                          >
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            Acessar Curso
+                          </Link>
+                        )}
+                      </div>
                     </div>
                     <p className="text-muted-foreground">
                       {trilha.description}
