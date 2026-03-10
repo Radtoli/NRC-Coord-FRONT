@@ -154,7 +154,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Trilhas Section */
+          {/* Trilhas Section */}
           {trilhas.length === 0 ? (
             <div className="text-center py-12">
               <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
