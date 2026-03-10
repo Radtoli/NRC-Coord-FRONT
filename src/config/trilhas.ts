@@ -33,8 +33,10 @@ export const getTrilhas = async (): Promise<Trilha[]> => {
       return [];
     }
 
-    const videosResponse = await videoService.listVideos();
-    const documentsResponse = await documentService.listDocuments();
+    const [videosResponse, documentsResponse] = await Promise.all([
+      videoService.listVideos().catch(() => ({ success: false as const, data: undefined })),
+      documentService.listDocuments().catch(() => ({ success: false as const, data: undefined })),
+    ]);
 
     const videos = videosResponse.success && videosResponse.data ? videosResponse.data : [];
     const documents = documentsResponse.success && documentsResponse.data ? documentsResponse.data : [];

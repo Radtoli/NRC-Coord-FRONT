@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { trilhaService, videoService } from "@/lib/services";
 import { Trilha as ApiTrilha, Video as ApiVideo } from "@/lib/services";
+import { avaService, Course } from "@/lib/services/ava.service";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, BookOpen, RefreshCw, AlertCircle, LayoutTemplate, Eye } from "lucide-react";
 
 interface TrilhaFormData {
@@ -21,6 +23,7 @@ interface TrilhaFormData {
 export function TrilhaManagement() {
   const [trilhas, setTrilhas] = useState<ApiTrilha[]>([]);
   const [videos, setVideos] = useState<ApiVideo[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -41,10 +44,13 @@ export function TrilhaManagement() {
       setIsLoading(true);
       setError("");
 
-      const [trilhasResponse, videosResponse] = await Promise.all([
+      const [trilhasResponse, videosResponse, coursesData] = await Promise.all([
         trilhaService.listTrilhas(),
-        videoService.listVideos()
+        videoService.listVideos(),
+        avaService.listCourses().catch(() => [] as Course[])
       ]);
+
+      setCourses(coursesData);
 
       if (trilhasResponse.success && trilhasResponse.data) {
         setTrilhas(trilhasResponse.data);
@@ -225,15 +231,24 @@ export function TrilhaManagement() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="courseId">ID do Curso AVA <span className="text-xs text-muted-foreground font-normal">(opcional)</span></Label>
-                  <Input
-                    id="courseId"
-                    value={formData.courseId}
-                    onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                    placeholder="Cole o ID do curso para linkar a trilha"
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-muted-foreground">Quando preenchido, um botão &quot;Acessar Curso&quot; aparecerá para o aluno no painel.</p>
+                  <Label htmlFor="courseId">Curso AVA vinculado <span className="text-xs text-muted-foreground font-normal">(opcional)</span></Label>
+                  <Select
+                    value={formData.courseId || "__none__"}
+                    onValueChange={(val) => setFormData({ ...formData, courseId: val === "__none__" ? "" : val })}
+                  >
+                    <SelectTrigger id="courseId" disabled={isSubmitting}>
+                      <SelectValue placeholder="Selecione um curso..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Nenhum</SelectItem>
+                      {courses.map((course) => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}{course.status !== 'published' ? ` (${course.status})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Quando selecionado, um botão &quot;Acessar Curso&quot; aparecerá para o aluno no painel.</p>
                 </div>
               </div>
 
@@ -309,7 +324,9 @@ export function TrilhaManagement() {
                       <div className="font-medium">{trilha.title}</div>
                       <div className="text-xs text-muted-foreground">ID: {trilha._id}</div>
                       {trilha.courseId && (
-                        <div className="text-xs text-primary mt-0.5">Curso: {trilha.courseId}</div>
+                        <div className="text-xs text-primary mt-0.5">
+                          Curso: {courses.find(c => c.id === trilha.courseId)?.title ?? trilha.courseId}
+                        </div>
                       )}
                     </div>
                   </TableCell>
