@@ -358,8 +358,8 @@ export const avaService = {
   deleteExamQuestion: (id: string) =>
     api.delete<{ success: boolean }>(`/ava/exam-questions/${id}`),
 
-  startExam: (moduleId: string, bankId: string) =>
-    api.post<{ success: boolean; data: ExamAttempt }>(`/ava/modules/${moduleId}/exam/start`, { bankId }).then(unwrap),
+  startExam: (moduleId: string) =>
+    api.post<{ success: boolean; data: ExamAttempt }>(`/ava/modules/${moduleId}/exam/start`).then(unwrap),
 
   submitExam: (attemptId: string, answers: { questionId: string; answer: string }[]) =>
     api.post<{ success: boolean; data: ExamResult }>('/ava/exam/submit', { attemptId, answers }).then(unwrap),
