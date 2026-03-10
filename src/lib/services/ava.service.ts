@@ -67,6 +67,7 @@ export interface Section {
 
 export interface FullPage {
   id: string;
+  moduleId: string;
   title: string;
   slug?: string;
   orderIndex: number;

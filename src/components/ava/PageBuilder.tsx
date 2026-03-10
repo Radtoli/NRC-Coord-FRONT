@@ -124,10 +124,12 @@ function ContentEditor({
 
 function SectionEditorModal({
   section,
+  moduleId,
   onClose,
   onSaved,
 }: {
   section: Section;
+  moduleId?: string;
   onClose: () => void;
   onSaved: (updated: Section) => void;
 }) {
@@ -143,6 +145,16 @@ function SectionEditorModal({
       setError(null);
       const updated = await avaService.updateSection(section.id, { title, config: sectionConfig });
       await avaService.updateSectionContent(section.id, content);
+
+      // When saving an EXAM_BANK section, also keep the module's examBankId in sync
+      if (section.type === 'EXAM_BANK' && moduleId && sectionConfig.exam_bank_id) {
+        try {
+          await avaService.updateModule(moduleId, { examBankId: sectionConfig.exam_bank_id as string });
+        } catch {
+          // Non-fatal: backend fallback will still work
+        }
+      }
+
       onSaved({ ...updated, content });
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro ao salvar.');
@@ -411,6 +423,7 @@ export function PageBuilder({ pageId }: Props) {
       {editingSection && (
         <SectionEditorModal
           section={editingSection}
+          moduleId={page?.moduleId}
           onClose={() => setEditingSection(null)}
           onSaved={updateSectionInState}
         />
